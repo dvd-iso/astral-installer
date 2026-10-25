@@ -1,0 +1,51 @@
+name: Publicar modpack
+
+# Publicar uma release com um .mrpack anexado atualiza o canal do instalador.
+# As releases do aplicativo (tags vX.Y.Z) não têm .mrpack e são ignoradas aqui.
+on:
+  release:
+    types: [published]
+
+permissions:
+  contents: write
+
+concurrency:
+  group: modpack
+  cancel-in-progress: false
+
+jobs:
+  publicar:
+    name: Publicar ${{ github.event.release.name || github.event.release.tag_name }}
+    if: contains(join(github.event.release.assets.*.name, ' '), '.mrpack')
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci --omit=dev
+      - name: Validar o .mrpack e gerar o canal
+        run: node scripts/publish-release-pack.cjs
+      - name: Testar a instalação nos três launchers
+        run: npm run verify:live
+      - name: Publicar o canal de atualização
+        run: |
+          git add channel/stable.json
+          if git diff --cached --quiet; then echo "Canal sem mudanças."; exit 0; fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git commit -m "Modpack: $(node -p 'require("./channel/stable.json").name')"
+          git push origin HEAD:main
+      # O GitHub marca a release nova como a mais recente; o link "baixar a versão mais recente"
+      # do site e do aplicativo deve continuar apontando para o Astral Installer.
+      - name: Manter o aplicativo como release mais recente
+        if: always()
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+        run: |
+          tag=$(gh release list --limit 100 --json tagName --jq '.[].tagName' | grep -E '^v[0-9]+\.[0-9]+\.[0-9]+$' | sort -V | tail -1)
+          if [ -n "$tag" ]; then gh release edit "$tag" --latest; fi

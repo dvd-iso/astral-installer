@@ -123,7 +123,19 @@ Essa verificação também usa pastas temporárias e remove os dados ao terminar
 
 O instalador acompanha **`channel/stable.json` na branch `main` deste repositório**. Uma atualização do pack não exige recompilar o aplicativo.
 
-1. Exporte o novo `.mrpack` e publique-o em uma URL HTTPS direta. Prefira um arquivo com nome versionado ou um asset de release, para conservar downloads antigos.
+### Pelo navegador (recomendado)
+
+1. Abra **[Nova release de modpack](https://github.com/dvd-iso/astral-installer/releases/new?tag=modpack-)** e complete a tag com um nome novo, por exemplo `modpack-2.1`.
+2. Arraste o `.mrpack` para a área de anexos. Na descrição, escreva o que mudou: o texto aparece no aplicativo como novidades.
+3. Clique em **Publish release**.
+
+O workflow **Publicar modpack** baixa o arquivo anexado, valida o pack, testa a instalação nos três launchers e publica o canal na `main`. Em poucos minutos o aplicativo mostra **Atualizar modpack**, e a página de instalação do site exibe as novas versões. Se algo falhar, o canal continua como estava e o GitHub avisa por e-mail; a aba **Actions** mostra o motivo. O workflow devolve o selo de release mais recente ao Astral Installer.
+
+Não apague releases de modpack: o canal baixa o pack do anexo da release publicada.
+
+### Pela linha de comando
+
+1. Publique o novo `.mrpack` em uma URL HTTPS direta, com nome versionado, para conservar downloads antigos.
 2. Gere o canal a partir do **mesmo arquivo publicado**:
 
    ```sh
