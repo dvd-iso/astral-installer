@@ -17,8 +17,16 @@
     <section class="intro">
       <p class="eyebrow">UM MUNDO. MUITAS HISTÓRIAS.</p>
       <h1>Seu próximo capítulo<br>começa <span>aqui.</span></h1>
-      <p class="lead">O Astral, pronto no seu Minecraft Launcher.</p>
+      <p class="lead">O Astral, pronto no seu launcher.</p>
     </section>
+    <fieldset class="launcher-selector">
+      <legend>Onde você quer jogar?</legend>
+      <div class="launcher-choices">
+        <label class="launcher-choice"><input type="radio" name="launcher" value="official" checked><span><strong>Minecraft Launcher</strong><small>Launcher oficial</small></span></label>
+        <label class="launcher-choice"><input type="radio" name="launcher" value="sklauncher"><span><strong>SKlauncher</strong><small>Versão 4 · instância própria</small></span></label>
+        <label class="launcher-choice"><input type="radio" name="launcher" value="prism"><span><strong>Prism Launcher</strong><small>Normal, portátil ou Flatpak</small></span></label>
+      </div>
+    </fieldset>
     <section class="pack-card" aria-labelledby="packName">
       <div class="card-top"><p class="eyebrow">MODPACK OFICIAL DO ASTRAL</p><span class="badge" id="badge">Consultando…</span></div>
       <h2 id="packName">Astral</h2>
@@ -33,13 +41,13 @@
       <p id="notice" class="notice" role="status" aria-live="polite" hidden></p>
       <div class="actions"><button id="install" class="primary" disabled>Preparando… <span aria-hidden="true">↓</span></button><button id="check" class="secondary">Buscar atualizações</button><button id="cancel" class="secondary" hidden>Cancelar</button></div>
       <button id="launch" class="launch" hidden>Abrir Minecraft Launcher <span aria-hidden="true">↗</span></button>
-      <p class="hint">Feche o jogo e o launcher para instalar ou atualizar. Depois, selecione o perfil <strong>Astral</strong> no launcher.</p>
+      <p class="hint" id="launcherHint">Feche o jogo e o launcher para instalar ou atualizar. Depois, selecione Astral no launcher escolhido.</p>
     </section>
     <section class="location" aria-labelledby="locationTitle">
       <div><h2 id="locationTitle">Uma pasta só para o Astral</h2><p id="gameDir" class="path">Detectando pasta…</p><p class="muted">Seus mundos, capturas e preferências ficam preservados nas atualizações.</p></div>
       <button id="choose" class="text-button">Localizar launcher</button>
     </section>
-    <details class="help"><summary>Ajuda e arquivos</summary><p>Use uma conta Microsoft com Minecraft Java no launcher oficial. Se o perfil não aparecer, habilite <strong>Modificadas</strong> na aba Instalações do launcher.</p><div class="help-links"><button data-link="launcher">Baixar launcher</button><button id="openGame">Pasta do modpack e backups</button><button id="openLogs">Pasta de logs</button><button data-link="releases">Atualizar este aplicativo</button></div></details>
+    <details class="help"><summary>Ajuda e arquivos</summary><p id="launcherHelp">Faça login diretamente no launcher escolhido. Cada launcher mantém sua própria instalação e seus próprios backups do Astral.</p><div class="help-links"><button data-link="launcher" id="downloadLauncher">Baixar launcher</button><button id="openGame">Pasta do modpack e backups</button><button id="openLogs">Pasta de logs</button><button data-link="releases">Atualizar este aplicativo</button></div></details>
   </main>
   <footer><button data-link="website">astralmc.online <span aria-hidden="true">↗</span></button><span id="appVersion">Astral Installer</span></footer>
   <script src="app.js"></script>

@@ -8,6 +8,7 @@ async function call(channel, ...args) {
 
 contextBridge.exposeInMainWorld("astral", {
   status: () => call("astral:status"),
+  selectLauncher: (id) => call("astral:select-launcher", id),
   check: () => call("astral:check"),
   chooseDirectory: () => call("astral:choose-directory"),
   install: () => call("astral:install"),

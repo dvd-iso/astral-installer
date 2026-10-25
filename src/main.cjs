@@ -2,7 +2,7 @@ const { app, BrowserWindow, ipcMain, dialog, shell } = require("electron");
 const path = require("node:path");
 const { pathToFileURL } = require("node:url");
 const { readJson, atomicWrite, jsonBytes } = require("./core/files.cjs");
-const { detectMinecraftDirectory } = require("./core/launcher.cjs");
+const { LAUNCHERS, launcherInfo, detectLauncherDirectory, installationTarget } = require("./core/launchers.cjs");
 const { installedState, getChannel, install } = require("./core/installer.cjs");
 const { ensureIdle, openLauncher, appendLog } = require("./desktop.cjs");
 const settings = require("./settings.cjs");
@@ -11,7 +11,9 @@ let window;
 let controller;
 let canCancel = false;
 let closeWhenDone = false;
-let minecraftDir;
+let preferences;
+let launcher;
+let changingLauncher = false;
 let lastProgressAt = 0;
 let lastPhase;
 const uiUrl = pathToFileURL(path.join(__dirname, "ui", "index.html")).href;
@@ -19,9 +21,22 @@ const uiUrl = pathToFileURL(path.join(__dirname, "ui", "index.html")).href;
 function log(message) { return appendLog(path.join(app.getPath("userData"), "installer.log"), message).catch(console.error); }
 
 async function status() {
-  minecraftDir ||= (await readJson(path.join(app.getPath("userData"), "preferences.json"), {})).minecraftDir || await detectMinecraftDirectory();
-  const gameDir = path.join(minecraftDir, "astral");
-  return { appVersion: app.getVersion(), platform: process.platform, arch: process.arch, minecraftDir, gameDir, installed: await installedState(gameDir), busy: Boolean(controller) };
+  preferences ||= await readJson(path.join(app.getPath("userData"), "preferences.json"), {});
+  launcher ||= Object.hasOwn(LAUNCHERS, preferences.launcher) ? preferences.launcher : "official";
+  const directories = preferences.directories || {};
+  const directory = directories[launcher] || (launcher === "official" && preferences.minecraftDir) || await detectLauncherDirectory(launcher);
+  const target = await installationTarget(launcher, directory);
+  return { appVersion: app.getVersion(), platform: process.platform, arch: process.arch,
+    launcher, launcherName: target.name, launchers: Object.values(LAUNCHERS), launcherDir: target.launcherDir, gameDir: target.gameDir,
+    installed: await installedState(target.gameDir), busy: Boolean(controller) || changingLauncher };
+}
+
+async function savePreferences() {
+  await atomicWrite(path.join(app.getPath("userData"), "preferences.json"), jsonBytes({ ...preferences, launcher }));
+}
+
+function requireIdle() {
+  if (controller || changingLauncher) throw new Error("Aguarde a operação atual terminar.");
 }
 
 function register(channel, callback) {
@@ -67,7 +82,15 @@ function createWindow() {
     const timeout = setTimeout(() => app.exit(1), 20_000);
     window.webContents.once("did-finish-load", async () => {
       try {
-        const valid = await window.webContents.executeJavaScript("window.astral.status().then(state => Boolean(document.querySelector('#install') && state.gameDir && !window.require))");
+        const valid = await window.webContents.executeJavaScript(`(async () => {
+          const initial = await window.astral.status();
+          for (const launcher of ['official', 'sklauncher', 'prism']) {
+            const state = await window.astral.selectLauncher(launcher);
+            if (state.launcher !== launcher || !state.gameDir || state.busy) return false;
+          }
+          await window.astral.selectLauncher(initial.launcher);
+          return Boolean(document.querySelector('#install') && document.querySelectorAll('[name="launcher"]').length === 3 && !window.require);
+        })()`);
         if (!valid) throw new Error("Interface ou preload indisponível.");
         console.log("Interface Electron e IPC carregados.");
         clearTimeout(timeout);
@@ -83,24 +106,45 @@ else {
   app.whenReady().then(() => {
     register("astral:status", status);
     register("astral:check", () => getChannel());
+    register("astral:select-launcher", async (id) => {
+      requireIdle();
+      launcherInfo(id);
+      changingLauncher = true;
+      let previous;
+      try {
+        await status();
+        previous = launcher;
+        launcher = id;
+        const selected = await status();
+        await savePreferences();
+        return { ...selected, busy: false };
+      } catch (error) { if (previous) launcher = previous; throw error; }
+      finally { changingLauncher = false; }
+    });
     register("astral:choose-directory", async () => {
-      if (controller) throw new Error("Aguarde a operação atual terminar.");
-      const result = await dialog.showOpenDialog(window, { title: "Pasta do Minecraft Launcher (.minecraft)", defaultPath: minecraftDir, properties: ["openDirectory", "showHiddenFiles"] });
-      if (!result.canceled) {
-        minecraftDir = result.filePaths[0];
-        await atomicWrite(path.join(app.getPath("userData"), "preferences.json"), jsonBytes({ minecraftDir }));
-      }
-      return status();
+      requireIdle();
+      changingLauncher = true;
+      try {
+        const current = await status();
+        const result = await dialog.showOpenDialog(window, { title: `Pasta do ${current.launcherName} (${launcherInfo(launcher).marker})`, defaultPath: current.launcherDir, properties: ["openDirectory", "showHiddenFiles"] });
+        if (!result.canceled) {
+          const target = await installationTarget(launcher, result.filePaths[0], { validate: true });
+          preferences = { ...preferences, directories: { ...preferences.directories, [launcher]: target.launcherDir } };
+          await savePreferences();
+        }
+        return { ...await status(), busy: false };
+      } finally { changingLauncher = false; }
     });
     register("astral:install", async () => {
-      if (controller) throw new Error("Já existe uma operação em andamento.");
+      requireIdle();
       controller = new AbortController();
       canCancel = true;
       try {
-        await status();
-        const result = await install({ minecraftDir, signal: controller.signal, onProgress: progress, ensureIdle: () => ensureIdle(path.join(minecraftDir, "astral")) });
+        const current = await status();
+        const result = await install({ launcher: current.launcher, launcherDir: current.launcherDir, signal: controller.signal,
+          onProgress: progress, ensureIdle: () => ensureIdle(current.gameDir, current.launcher) });
         await log(`Instalado ${result.state.name} (${result.state.version}); ${result.preserved.length} preferências preservadas.`);
-        return { ...await status(), backupDir: result.backupDir, preserved: result.preserved };
+        return { ...await status(), busy: false, backupDir: result.backupDir, preserved: result.preserved, message: result.message, channel: result.channel };
       } finally {
         controller = null;
         canCancel = false;
@@ -109,17 +153,19 @@ else {
     });
     register("astral:cancel", () => { if (canCancel) controller?.abort(); });
     register("astral:open-launcher", async () => {
-      if (controller) throw new Error("Aguarde a instalação terminar.");
-      return openLauncher();
+      requireIdle();
+      const current = await status();
+      requireIdle();
+      return openLauncher({ id: current.launcher, launcherDir: current.launcherDir });
     });
     register("astral:open-folder", async (kind) => {
-      const target = kind === "logs" ? app.getPath("userData") : kind === "game" ? path.join(minecraftDir, "astral") : null;
+      const target = kind === "logs" ? app.getPath("userData") : kind === "game" ? (await status()).gameDir : null;
       if (!target) throw new Error("Pasta desconhecida.");
       const failure = await shell.openPath(target);
       if (failure) throw new Error(failure);
     });
     register("astral:open-link", async (kind) => {
-      const url = { website: settings.websiteUrl, releases: settings.releasesUrl, launcher: settings.launcherUrl }[kind];
+      const url = { website: settings.websiteUrl, releases: settings.releasesUrl, launcher: launcherInfo((await status()).launcher).url }[kind];
       if (!url) throw new Error("Link desconhecido.");
       return shell.openExternal(url);
     });

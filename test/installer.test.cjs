@@ -11,6 +11,8 @@ const { readPack, packPath } = require("../src/core/pack.cjs");
 const { withInstallLock, recoverTransaction } = require("../src/core/transaction.cjs");
 const { downloadUrl } = require("../src/core/network.cjs");
 const { minecraftDirectories, mavenArtifact } = require("../src/core/launcher.cjs");
+const { installationTarget, INSTANCE_ID, launcherDirectories, iniValue, updateIni, launcherInfo } = require("../src/core/launchers.cjs");
+const { processesAreBusy } = require("../src/desktop.cjs");
 
 async function fixture(t) {
   const directory = await fs.mkdtemp(path.join(process.env.ASTRAL_TEST_TMP || os.tmpdir(), "astral-installer-test-"));
@@ -31,7 +33,7 @@ async function fixture(t) {
   await new Promise((resolve) => server.listen(0, "127.0.0.1", resolve));
   const base = `http://127.0.0.1:${server.address().port}`;
   t.after(async () => { server.closeAllConnections(); await new Promise((resolve) => server.close(resolve)); await fs.rm(directory, { recursive: true, force: true }); });
-  const vanilla = jsonBytes({ id: "26.3", type: "release", mainClass: "net.minecraft.client.main.Main" });
+  const vanilla = jsonBytes({ id: "26.3", type: "release", mainClass: "net.minecraft.client.main.Main", javaVersion: { component: "java-runtime-epsilon", majorVersion: 25 } });
   routes.set("/vanilla.json", vanilla);
   routes.set("/minecraft.json", jsonBytes({ versions: [{ id: "26.3", url: `${base}/vanilla.json`, sha1: hashBuffer(vanilla, "sha1") }] }));
   const lib = Buffer.from("fabric library");
@@ -41,8 +43,12 @@ async function fixture(t) {
     id: "fabric-loader-0.19.5-26.3", inheritsFrom: "26.3", libraries: [{ name: "net.fabricmc:loader:0.19.5", url: `${base}/maven/` }],
     mainClass: "net.fabricmc.loader.impl.launch.knot.KnotClient",
   }));
-  function publish(version, mods = { [`mods/version-${version}.jar`]: `mod ${version}`, "mods/shared.jar": "shared" }, overrides = { "options.txt": `options ${version}`, "config/example.json": `config ${version}` }) {
-    const index = { formatVersion: 1, game: "minecraft", name: "Astral Teste", versionId: version, dependencies: { minecraft: "26.3", "fabric-loader": "0.19.5" }, files: [] };
+  routes.set("/fabric/versions/loader/26.3/0.19.6/profile/json", jsonBytes({
+    id: "fabric-loader-0.19.6-26.3", inheritsFrom: "26.3", libraries: [{ name: "net.fabricmc:loader:0.19.5", url: `${base}/maven/` }],
+    mainClass: "net.fabricmc.loader.impl.launch.knot.KnotClient",
+  }));
+  function publish(version, mods = { [`mods/version-${version}.jar`]: `mod ${version}`, "mods/shared.jar": "shared" }, overrides = { "options.txt": `options ${version}`, "config/example.json": `config ${version}` }, fabricLoader = "0.19.5") {
+    const index = { formatVersion: 1, game: "minecraft", name: "Astral Teste", versionId: version, dependencies: { minecraft: "26.3", "fabric-loader": fabricLoader }, files: [] };
     for (const [relative, content] of Object.entries(mods)) {
       const data = Buffer.from(content);
       const route = `/files/${hashBuffer(data)}`;
@@ -54,7 +60,7 @@ async function fixture(t) {
     for (const [relative, content] of Object.entries(overrides)) zip.addFile(`overrides/${relative}`, Buffer.from(content));
     const archive = zip.toBuffer();
     routes.set(`/pack-${version}.mrpack`, archive);
-    const channel = { schemaVersion: 1, id: "astral", name: "Astral Teste", version, minecraftVersion: "26.3", fabricLoader: "0.19.5", pack: { url: `${base}/pack-${version}.mrpack`, size: archive.length, sha512: hashBuffer(archive) } };
+    const channel = { schemaVersion: 1, id: "astral", name: "Astral Teste", version, minecraftVersion: "26.3", fabricLoader, pack: { url: `${base}/pack-${version}.mrpack`, size: archive.length, sha512: hashBuffer(archive) } };
     routes.set("/channel.json", jsonBytes(channel));
     return { index, zip, archive, channel };
   }
@@ -228,4 +234,175 @@ test("detecta os diretórios padrões nos três sistemas", () => {
   assert.equal(minecraftDirectories("linux", "/home/test", {})[0], path.join("/home/test", ".minecraft"));
   assert.equal(minecraftDirectories("darwin", "/Users/test", {})[0], path.join("/Users/test", "Library", "Application Support", "minecraft"));
   assert.equal(minecraftDirectories("win32", "C:/Users/test", { APPDATA: "C:/Users/test/AppData/Roaming" })[0], path.join("C:/Users/test/AppData/Roaming", ".minecraft"));
+});
+
+async function nativeLauncher(f, id, { customStorage = false } = {}) {
+  const launcherDir = path.join(f.directory, `${id}-root`);
+  await fs.mkdir(launcherDir);
+  let expectedGameDir;
+  if (id === "prism") {
+    const instancesDir = customStorage ? path.join(f.directory, "meus packs Prism") : path.join(launcherDir, "instances");
+    await fs.mkdir(path.join(instancesDir, "outro"), { recursive: true });
+    await fs.writeFile(path.join(instancesDir, "outro/instance.cfg"), "[General]\nname=Minha instância\nInstanceType=OneSix\n");
+    await fs.writeFile(path.join(launcherDir, "prismlauncher.cfg"), `[General]\nInstanceDir=${instancesDir.replaceAll("\\", "/")}\nMaxMemAlloc=6144\n`);
+    expectedGameDir = path.join(await fs.realpath(instancesDir), INSTANCE_ID, "minecraft");
+  } else {
+    let storageRoot = launcherDir;
+    await fs.writeFile(path.join(launcherDir, "instances.json"), jsonBytes({ schema: "preservar", instances: [{ id: "outro", name: "Meu mundo", type: "custom", directory: "preservar" }] }));
+    if (customStorage) {
+      const dataDir = path.join(f.directory, "meus packs SK");
+      await fs.mkdir(dataDir);
+      await fs.writeFile(path.join(launcherDir, "location.json"), jsonBytes({ dataDir }));
+      storageRoot = dataDir;
+    }
+    expectedGameDir = path.join(await fs.realpath(storageRoot), "instances", INSTANCE_ID);
+  }
+  const target = await installationTarget(id, launcherDir, { validate: true });
+  return { target, options: { ...f.options, launcher: id, launcherDir }, launcherDir, expectedGameDir };
+}
+
+for (const id of ["sklauncher", "prism"]) {
+  test(`${id}: instala e atualiza a instância nativa sem alterar outros launchers`, async (t) => {
+    const f = await fixture(t);
+    const { target, options, launcherDir, expectedGameDir } = await nativeLauncher(f, id);
+    const originalOfficial = await hashFile(path.join(f.minecraftDir, "launcher_profiles.json"));
+    f.publish("1.0.0");
+    const initial = await install(options);
+    assert.equal(initial.state.launcher, id);
+    assert.equal(initial.gameDir, expectedGameDir);
+    assert.equal(await fs.readFile(path.join(target.gameDir, "mods/version-1.0.0.jar"), "utf8"), "mod 1.0.0");
+    if (id === "prism") {
+      const pack = await readJson(path.join(target.instanceDir, "mmc-pack.json"));
+      assert.equal(pack.components.find((item) => item.uid === "net.minecraft").version, "26.3");
+      assert.equal(pack.components.find((item) => item.uid === "net.fabricmc.fabric-loader").version, "0.19.5");
+      assert.equal(iniValue(await fs.readFile(path.join(target.instanceDir, "instance.cfg"), "utf8"), "InstanceType"), "OneSix");
+      await fs.appendFile(path.join(target.instanceDir, "instance.cfg"), "OverrideMemory=true\nMaxMemAlloc=8192\n");
+    } else {
+      const store = await readJson(path.join(launcherDir, "instances.json"));
+      assert.equal(store.schema, "preservar");
+      const instance = store.instances.find((item) => item.id === INSTANCE_ID);
+      assert.equal(instance.type, "custom");
+      assert.equal(instance.gameType, "fabric");
+      assert.equal(instance.javaComponent, "java-runtime-epsilon");
+      assert.equal(instance.installComplete, false, "a preparação do jogo pertence ao SKlauncher");
+      instance.installComplete = true;
+      instance.playTime = 456;
+      instance.memoryMax = 8192;
+      await fs.writeFile(path.join(launcherDir, "instances.json"), jsonBytes(store));
+      assert(initial.sklauncherPreparation);
+    }
+    await fs.mkdir(path.join(target.gameDir, "saves/pessoal"), { recursive: true });
+    await fs.writeFile(path.join(target.gameDir, "saves/pessoal/level.dat"), "mundo pessoal");
+    await fs.writeFile(path.join(target.gameDir, "options.txt"), "minhas opções");
+    f.publish("1.1.0");
+    const updated = await install(options);
+    assert.equal(updated.state.version, "1.1.0");
+    assert(!await exists(path.join(target.gameDir, "mods/version-1.0.0.jar")));
+    assert.equal(await fs.readFile(path.join(target.gameDir, "mods/version-1.1.0.jar"), "utf8"), "mod 1.1.0");
+    assert.equal(await fs.readFile(path.join(target.gameDir, "options.txt"), "utf8"), "minhas opções");
+    assert.equal(await fs.readFile(path.join(target.gameDir, "saves/pessoal/level.dat"), "utf8"), "mundo pessoal");
+    assert.equal(await hashFile(path.join(f.minecraftDir, "launcher_profiles.json")), originalOfficial);
+    if (id === "sklauncher") {
+      const store = await readJson(path.join(launcherDir, "instances.json"));
+      assert.deepEqual(store.instances.find((item) => item.id === "outro"), { id: "outro", name: "Meu mundo", type: "custom", directory: "preservar" });
+      const instance = store.instances.find((item) => item.id === INSTANCE_ID);
+      assert.equal(instance.installComplete, true, "atualizar só os mods não deve reinstalar o jogo");
+      assert.equal(instance.playTime, 456);
+      assert.equal(instance.memoryMax, 8192);
+      assert.equal(updated.sklauncherPreparation, false);
+    } else {
+      assert.equal(iniValue(await fs.readFile(path.join(target.instanceDir, "instance.cfg"), "utf8"), "MaxMemAlloc"), "8192");
+      assert.equal(await fs.readFile(path.join(path.dirname(target.instanceDir), "outro/instance.cfg"), "utf8"), "[General]\nname=Minha instância\nInstanceType=OneSix\n");
+      assert.equal(f.hits.get("/minecraft.json"), undefined, "o Prism gerencia seus próprios componentes e downloads do jogo");
+    }
+  });
+
+  test(`${id}: respeita armazenamento personalizado e reverte uma atualização interrompida`, async (t) => {
+    const f = await fixture(t);
+    const { target, options, launcherDir, expectedGameDir } = await nativeLauncher(f, id, { customStorage: true });
+    assert.equal(target.gameDir, expectedGameDir, "deve usar o armazenamento configurado no launcher");
+    f.publish("1.0.0");
+    assert.equal((await install(options)).gameDir, expectedGameDir);
+    const registration = id === "sklauncher" ? path.join(launcherDir, "instances.json") : path.join(target.instanceDir, "mmc-pack.json");
+    const original = await hashFile(registration);
+    f.publish("1.1.0", undefined, undefined, "0.19.6");
+    await assert.rejects(install({ ...options, transactionOptions: { async afterOperation() {
+      if ((await installedState(target.gameDir))?.version === "1.1.0") throw new Error("falha após registrar a atualização");
+    } } }), /falha após registrar/);
+    assert.equal(await hashFile(registration), original);
+    assert.equal((await installedState(target.gameDir)).version, "1.0.0");
+    assert(!await exists(path.join(target.gameDir, "mods/version-1.1.0.jar")));
+    assert(await exists(path.join(target.gameDir, "mods/version-1.0.0.jar")));
+    const updated = await install(options);
+    assert.equal(updated.state.fabricLoader, "0.19.6");
+    if (id === "sklauncher") {
+      const store = await readJson(registration);
+      const instance = store.instances.find((item) => item.id === INSTANCE_ID);
+      assert.equal(instance.versionId, "fabric-loader-0.19.6-26.3");
+      assert.equal(instance.installComplete, false);
+    } else assert.equal((await readJson(registration)).components.find((item) => item.uid === "net.fabricmc.fabric-loader").version, "0.19.6");
+  });
+
+  test(`${id}: recusa substituir uma instância que não pertence ao instalador`, async (t) => {
+    const f = await fixture(t);
+    const { target, options, launcherDir } = await nativeLauncher(f, id);
+    if (id === "sklauncher") {
+      const store = await readJson(path.join(launcherDir, "instances.json"));
+      store.instances.push({ id: INSTANCE_ID, name: "Instância pessoal" });
+      await fs.writeFile(path.join(launcherDir, "instances.json"), jsonBytes(store));
+    } else {
+      await fs.mkdir(target.instanceDir, { recursive: true });
+      await fs.writeFile(path.join(target.instanceDir, "instance.cfg"), "[General]\nname=Meu pack pessoal\n");
+    }
+    f.publish("1.0.0");
+    await assert.rejects(install(options), /não pertence|outra instalação/);
+    assert.equal(f.hits.get("/channel.json"), undefined, "a colisão deve ser detectada antes dos downloads");
+  });
+}
+
+test("mantém instalações independentes ao alternar entre os três launchers", async (t) => {
+  const f = await fixture(t);
+  const sk = await nativeLauncher(f, "sklauncher");
+  const prism = await nativeLauncher(f, "prism");
+  f.publish("1.0.0");
+  await install(f.options);
+  await install(sk.options);
+  await install(prism.options);
+  f.publish("1.1.0");
+  await install(prism.options);
+  assert.equal((await installedState(f.gameDir)).version, "1.0.0");
+  assert.equal((await installedState(sk.target.gameDir)).version, "1.0.0");
+  assert.equal((await installedState(prism.target.gameDir)).version, "1.1.0");
+});
+
+test("detecta pastas e processos de cada launcher e preserva o INI do Prism", () => {
+  assert.equal(launcherDirectories("sklauncher", "linux", "/home/test", {})[0], path.join("/home/test", ".sklauncher"));
+  assert.equal(launcherDirectories("sklauncher", "win32", "home", { APPDATA: "appdata" })[0], path.join("appdata", ".sklauncher"));
+  assert.equal(launcherDirectories("sklauncher", "darwin", "/Users/test", {})[0], path.join("/Users/test", "Library", "Application Support", "sklauncher"));
+  assert.equal(launcherDirectories("prism", "linux", "/home/test", { XDG_DATA_HOME: "/data" })[0], path.join("/data", "PrismLauncher"));
+  assert(launcherDirectories("prism", "linux", "/home/test", {}).some((directory) => directory.includes("org.prismlauncher.PrismLauncher")));
+  const ini = "[General]\nname=Antigo\nOverrideMemory=true\nMaxMemAlloc=8192\n[Outra]\nname=Intacto\n";
+  const changed = updateIni(ini, { name: "Astral", InstanceType: "OneSix" }).toString();
+  assert.equal(iniValue(changed, "name"), "Astral");
+  assert.equal(iniValue(changed, "MaxMemAlloc"), "8192");
+  assert(changed.includes("[Outra]\nname=Intacto"));
+  assert(processesAreBusy("SKlauncher /Applications/sklauncher.app/Contents/MacOS/SKlauncher", "/pack", "sklauncher"));
+  assert(processesAreBusy("prismlauncher /usr/bin/prismlauncher", "/pack", "prism"));
+  assert(!processesAreBusy("prismlauncher /usr/bin/prismlauncher", "/pack", "sklauncher"));
+  assert(processesAreBusy("java net.fabricmc.loader.impl.launch.knot.KnotClient", "/pack", "prism"));
+  assert.throws(() => launcherInfo("constructor"), /Escolha/);
+});
+
+test("migra o estado da versão 1.0 sem recriar a instalação oficial", async (t) => {
+  const f = await fixture(t);
+  f.publish("1.0.0");
+  await install(f.options);
+  const file = path.join(f.gameDir, ".astral/state.json");
+  const legacy = await readJson(file);
+  delete legacy.launcher;
+  await fs.writeFile(file, jsonBytes(legacy));
+  f.publish("1.1.0");
+  const result = await install(f.options);
+  assert.equal(result.state.launcher, "official");
+  assert.equal(result.gameDir, await fs.realpath(f.gameDir));
 });

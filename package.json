@@ -1,7 +1,7 @@
 {
   "name": "astral-installer",
-  "version": "1.0.0",
-  "description": "Instalador e atualizador do modpack Astral para o Minecraft Launcher oficial.",
+  "version": "1.1.0",
+  "description": "Instalador e atualizador do Astral para Minecraft Launcher, SKlauncher e Prism Launcher.",
   "private": true,
   "main": "src/main.cjs",
   "author": "Astral <https://astralmc.online>",

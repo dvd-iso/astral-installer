@@ -1,9 +1,8 @@
 const fs = require("node:fs/promises");
-const path = require("node:path");
 const { exists, safeTarget, readJson, jsonBytes, hashFile, atomicWrite } = require("./files.cjs");
 const { fetchJson, downloadVerified } = require("./network.cjs");
 const { validateChannel, readPack, packPath, preserveChanges } = require("./pack.cjs");
-const { launcherFiles, prepareRuntime, profileOperations } = require("./launcher.cjs");
+const { installationTarget, verifyOwnership, prepareLauncherRuntime, registrationOperations, completionMessage } = require("./launchers.cjs");
 const { withInstallLock, recoverTransaction, applyTransaction } = require("./transaction.cjs");
 const settings = require("../settings.cjs");
 const appVersion = require("../../package.json").version;
@@ -37,15 +36,15 @@ async function installedState(gameDir) {
 }
 
 async function install(options) {
-  const minecraftDir = await fs.realpath(options.minecraftDir);
-  await launcherFiles(minecraftDir);
-  const gameDir = path.join(minecraftDir, "astral");
-  const roots = { game: gameDir, minecraft: minecraftDir };
+  const target = await installationTarget(options.launcher || "official", options.launcherDir || options.minecraftDir, { validate: true });
+  await verifyOwnership(target);
+  const { gameDir, roots } = target;
   const emit = (detail) => options.onProgress?.(detail);
   await options.ensureIdle?.();
   return withInstallLock(gameDir, async () => {
     if (await recoverTransaction(roots)) emit({ phase: "recovery", message: "Instalação interrompida recuperada.", canCancel: true });
     const previous = await installedState(gameDir);
+    if (previous && (previous.launcher || "official") !== target.id) throw new Error("Esta pasta pertence à instalação do Astral em outro launcher.");
     emit({ phase: "check", message: "Consultando a versão atual do Astral…", canCancel: true });
     const channel = await getChannel(options);
     const cacheDir = await safeTarget(gameDir, ".astral/cache");
@@ -107,13 +106,15 @@ async function install(options) {
         if (preserveChanges(relative) && await hashFile(target) !== info.sha512) { preserved.push(relative); continue; }
         operations.push({ root: "game", path: relative, remove: true });
       }
-      const runtime = await prepareRuntime(channel, minecraftDir, stage, cacheDir, { ...options, onProgress: emit });
+      const runtime = await prepareLauncherRuntime(target, channel, stage, cacheDir, { ...options, onProgress: emit });
       operations.push(...runtime.operations);
       options.signal?.throwIfAborted();
       await options.ensureIdle?.();
-      operations.push(...await profileOperations(minecraftDir, gameDir, runtime.loaderId));
+      const registration = await registrationOperations(target, channel, runtime);
+      operations.push(...registration.operations);
+      const sklauncherPreparation = target.id === "sklauncher" && registration.needsPreparation;
       const state = {
-        schemaVersion: 1, id: "astral", version: channel.version, name: channel.name,
+        schemaVersion: 1, id: "astral", launcher: target.id, version: channel.version, name: channel.name,
         packSha512: channel.pack.sha512, minecraftVersion: channel.minecraftVersion, fabricLoader: channel.fabricLoader,
         installedAt: previous?.installedAt || new Date().toISOString(), updatedAt: new Date().toISOString(),
         files: fileSpecs, preserved,
@@ -121,10 +122,11 @@ async function install(options) {
       operations.push({ root: "game", path: ".astral/state.json", data: jsonBytes(state) });
       options.signal?.throwIfAborted();
       // Depois deste ponto, concluir ou reverter é obrigatório; cancelar fica indisponível.
-      emit({ phase: "commit", message: "Aplicando a instalação e criando o perfil Astral…", canCancel: false });
+      emit({ phase: "commit", message: `Aplicando a instalação no ${target.name}…`, canCancel: false });
       const backupDir = await applyTransaction(roots, operations, options.transactionOptions);
-      emit({ phase: "done", message: "Tudo pronto! Abra o Minecraft Launcher e selecione Astral.", canCancel: false });
-      return { state, backupDir, gameDir, preserved };
+      const message = completionMessage(target, sklauncherPreparation);
+      emit({ phase: "done", message, canCancel: false });
+      return { state, backupDir, gameDir, preserved, launcher: target.id, message, sklauncherPreparation, channel };
     } finally { await fs.rm(stage, { recursive: true, force: true }); }
   });
 }

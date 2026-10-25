@@ -94,7 +94,7 @@ async function prepareRuntime(channel, minecraftDir, stage, cacheDir, options = 
     // O arquivo é verificado em cache; a cópia ao launcher participa da transação.
     operations.push({ root: "minecraft", path: relative, source: staged });
   }
-  return { loaderId, operations };
+  return { loaderId, operations, javaComponent: vanillaJson.javaVersion?.component };
 }
 
 async function profileOperations(minecraftDir, gameDir, loaderId) {

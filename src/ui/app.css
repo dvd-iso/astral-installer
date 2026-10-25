@@ -17,6 +17,16 @@ main { padding: 26px 32px 0; }
 h1 { font-weight: 650; font-size: clamp(32px, 4.5vw, 44px); letter-spacing: -.035em; line-height: 1.15; margin: 0 0 13px; }
 h1 span { color: #f2ce75; }
 .lead { color: #b2a9c4; margin: 0; font-size: 15px; }
+.launcher-selector { padding: 0; border: 0; margin: 0 0 20px; min-width: 0; }
+.launcher-selector legend { padding: 0; margin-bottom: 10px; font-size: 12px; color: #c6b6dd; }
+.launcher-choices { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
+.launcher-choice { padding: 13px 12px; border: 1px solid #3b304d; background: #ffffff03; cursor: pointer; display: flex; align-items: center; gap: 9px; }
+.launcher-choice:has(input:checked) { border-color: #b18bdc; background: #9a6aca18; }
+.launcher-choice:has(input:disabled) { opacity: .6; cursor: default; }
+.launcher-choice:focus-within { outline: 2px solid #dac8ff; outline-offset: 3px; }
+.launcher-choice input { accent-color: #c599f3; margin: 0; flex: none; }
+.launcher-choice strong { display: block; font-size: 11px; color: #e8ddf6; font-weight: 600; }
+.launcher-choice small { display: block; font-size: 9px; color: #a99abf; margin-top: 5px; line-height: 1.4; }
 .pack-card { border: 1px solid #403451; border-top: 2px solid #ae8be5; background: linear-gradient(140deg, #1a1526e6, #100f1ce6); padding: 26px; box-shadow: 0 20px 60px #0003; }
 .card-top { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
 .card-top .eyebrow { margin: 0; }

@@ -1,8 +1,8 @@
 # Astral Installer
 
-**O modpack do [Astral](https://astralmc.online), pronto no Minecraft Launcher oficial.**
+**O modpack do [Astral](https://astralmc.online), pronto no Minecraft Launcher, SKlauncher e Prism Launcher.**
 
-Instalador auxiliar para **Windows, macOS e Linux**, com instalação, atualização e reparo do modpack. O aplicativo prepara um perfil **Astral** no launcher oficial e mantém os arquivos do pack em uma pasta exclusiva.
+Instalador auxiliar para **Windows, macOS e Linux**, com instalação, atualização e reparo do modpack. Escolha entre **Minecraft Launcher oficial**, **SKlauncher 4** e **Prism Launcher**: cada um recebe seu próprio perfil ou instância **Astral**, com arquivos e atualizações independentes.
 
 ## Baixar
 
@@ -15,19 +15,29 @@ Instalador auxiliar para **Windows, macOS e Linux**, com instalação, atualiza�
 | macOS · Intel | `Astral-Installer-…-mac-x64.dmg` |
 | Linux · x64 ou ARM64 | `Astral-Installer-…-linux-….AppImage` ou `.deb` |
 
-Também há ZIPs para macOS e checksums SHA-256 em cada release. Os pacotes incluem o runtime do instalador; não é necessário instalar Node ou Java para abrir o aplicativo. O Minecraft e o Java usados para jogar são baixados pelo launcher oficial.
+Também há ZIPs para macOS e checksums SHA-256 em cada release. Os pacotes incluem o runtime do instalador; não é necessário instalar Node ou Java para abrir o aplicativo. O Minecraft e o Java usados para jogar são gerenciados pelo launcher escolhido.
 
 ## Como usar
 
-1. Instale e abra o **[Minecraft Launcher oficial](https://www.minecraft.net/download)** pelo menos uma vez. Use sua conta Microsoft com Minecraft Java.
-2. Feche o jogo e o launcher. Abra o **Astral Installer**.
-3. Confira a pasta detectada. Se necessário, use **Localizar launcher** e escolha a pasta que contém `launcher_profiles.json` ou `launcher_profiles_microsoft_store.json`.
+1. Instale e abra seu launcher pelo menos uma vez: **[Minecraft Launcher](https://www.minecraft.net/download)**, **[SKlauncher 4](https://next.skmedix.pl/downloads)** ou **[Prism Launcher](https://prismlauncher.org/download/)**. Configure sua conta diretamente nele.
+2. Feche o jogo e o launcher. Abra o **Astral Installer** e escolha seu launcher nos três cartões.
+3. Confira a pasta detectada. Se necessário, use **Localizar launcher** e escolha a pasta de dados indicada na tabela abaixo.
 4. Clique em **Instalar Astral** e aguarde.
-5. Clique em **Abrir Minecraft Launcher**, selecione **Astral** e jogue. Se o perfil estiver oculto, habilite **Modificadas** na aba **Instalações**.
+5. Clique em **Abrir [seu launcher]** e selecione **Astral**. O launcher prepara os arquivos do jogo e o Java conforme necessário.
 
-Para atualizar, reabra o instalador, clique em **Buscar atualizações** e depois em **Atualizar modpack**. A consulta também acontece ao abrir o aplicativo. Quando não há nova versão, **Verificar e reparar** recupera mods ausentes ou corrompidos. O botão **Atualizar este aplicativo**, em Ajuda, leva às releases do próprio instalador.
+| Launcher | Como identificar a pasta de dados | Primeiro uso |
+| --- | --- | --- |
+| Minecraft Launcher | `launcher_profiles.json` ou `launcher_profiles_microsoft_store.json` | Use sua conta Microsoft com Minecraft Java. Se o perfil estiver oculto, habilite **Modificadas** na aba **Instalações**. |
+| SKlauncher 4 | `instances.json` | Selecione **Astral** e use **Instalar** no SKlauncher para preparar Minecraft/assets/Java. |
+| Prism Launcher | `prismlauncher.cfg` | A instância aparece na lista. Em instalações portáteis, encontre a raiz em **Pastas → Pasta do launcher**. |
+
+Para atualizar, reabra o instalador, **selecione o mesmo launcher**, clique em **Buscar atualizações** e depois em **Atualizar modpack**. A consulta também acontece ao abrir o aplicativo. Quando não há nova versão, **Verificar e reparar** recupera mods ausentes ou corrompidos. O botão **Atualizar este aplicativo**, em Ajuda, leva às releases do próprio instalador.
+
+O aplicativo lembra a última escolha e a pasta de cada launcher. Instalar no Prism não modifica uma instalação do SKlauncher ou do launcher oficial. Quem usa a versão 1.0 pode atualizar o aplicativo: a instalação oficial existente continua no mesmo local.
 
 ### Pasta do modpack
+
+**Minecraft Launcher oficial:**
 
 | Sistema | Pasta padrão |
 | --- | --- |
@@ -38,6 +48,31 @@ Para atualizar, reabra o instalador, clique em **Buscar atualizações** e depoi
 
 O instalador reconhece os arquivos de perfis dos launchers clássico e Microsoft Store e adiciona seu próprio perfil, preservando os demais.
 
+**SKlauncher 4:**
+
+| Sistema | Pasta padrão |
+| --- | --- |
+| Windows | `%APPDATA%\.sklauncher\instances\astral-installer` |
+| macOS | `~/Library/Application Support/sklauncher/instances/astral-installer` |
+| Linux | `~/.sklauncher/instances/astral-installer` |
+
+A instância é registrada em `instances.json`, com Minecraft/Fabric fixados nas versões do pack. A configuração `location.json → dataDir` é respeitada quando o armazenamento foi movido; **Localizar launcher** continua apontando para a pasta de configuração que contém `instances.json`.
+
+O SKlauncher termina a preparação de Minecraft, assets e Java por seu fluxo nativo **Instalar**. Uma atualização só de mods conserva o estado de preparação; mudar Minecraft ou Fabric solicita nova preparação. O suporte nativo é para **SKlauncher 4**, cujo formato foi conferido no build 4.0.40. O SKlauncher 3 usa outro formato.
+
+**Prism Launcher:**
+
+| Sistema | Pasta padrão |
+| --- | --- |
+| Windows | `%APPDATA%\PrismLauncher\instances\astral-installer\minecraft` |
+| macOS | `~/Library/Application Support/PrismLauncher/instances/astral-installer/minecraft` |
+| Linux | `~/.local/share/PrismLauncher/instances/astral-installer/minecraft` |
+| Linux · Flatpak | `~/.var/app/org.prismlauncher.PrismLauncher/data/PrismLauncher/instances/astral-installer/minecraft` |
+
+São gerados `instance.cfg` e `mmc-pack.json` no formato nativo. O `InstanceDir` configurado em `prismlauncher.cfg`, `XDG_DATA_HOME`, instalações Scoop e pastas portáteis são respeitados. Minecraft, Fabric, bibliotecas e Java são preparados pelo Prism ao jogar.
+
+Nos dois launchers de instâncias, `astral-installer` é o ID interno e **Astral** é o nome exibido. Se esse ID já pertencer a outra instalação, o aplicativo informa a colisão e preserva seus arquivos. As demais instâncias e as contas do launcher são mantidas.
+
 ### O que acontece em uma atualização
 
 - O canal público informa a versão e o SHA-512 do `.mrpack`.
@@ -46,7 +81,7 @@ O instalador reconhece os arquivos de perfis dos launchers clássico e Microsoft
 - Mods antigos só são removidos se estiverem registrados como arquivos do pack.
 - Mundos, capturas e arquivos adicionados pelo jogador ficam preservados.
 - Configurações em `config/`, `options.txt`, `optionsof.txt` e `servers.dat` alteradas localmente são preservadas. Os novos defaults de overrides ficam em `.astral/defaults/`.
-- A aplicação cria backup dos arquivos substituídos/removidos, incluindo perfis do launcher, em `astral/.astral/backups/`. Se ocorrer falha durante a aplicação, as alterações são revertidas. Uma aplicação interrompida é recuperada na próxima instalação.
+- A aplicação cria backup dos arquivos substituídos/removidos, incluindo os registros da instância no launcher, em `.astral/backups/` dentro da pasta do modpack. Se ocorrer falha durante a aplicação, as alterações são revertidas. Uma aplicação interrompida é recuperada na próxima instalação.
 - O estado da versão só é gravado depois dos arquivos e dos perfis. Cancelar durante os downloads mantém a versão instalada.
 
 Os backups e o cache ficam disponíveis na pasta do pack. Podem ser removidos para liberar espaço **com o aplicativo fechado e sem `transaction.json` pendente**; a instalação continua registrada em `.astral/state.json`.
@@ -63,7 +98,7 @@ npm start
 ```
 
 ```text
-src/core/       Importação mrpack, downloads, Fabric, perfis e atualização transacional
+src/core/       Importação mrpack, downloads, adaptadores dos três launchers e atualização transacional
 src/main.cjs    Aplicativo Electron e IPC
 src/preload.cjs API isolada para a interface
 src/ui/         Interface local em português
@@ -74,13 +109,13 @@ test/           Instalação, atualização, corrupção, cancelamento e recuper
 
 O renderer tem sandbox, isolamento de contexto, Node desativado e nenhuma conexão de rede. Downloads e acesso aos arquivos acontecem no processo principal, por uma API limitada. O aplicativo não solicita nem armazena credenciais Microsoft.
 
-Os testes usam um servidor HTTP de loopback e pastas temporárias; não alteram a instalação pessoal do Minecraft. Para verificar também o **pack real publicado**, com download de todos os mods e validação dos arquivos instalados:
+Os 21 testes cobrem os três launchers, armazenamento personalizado, isolamento das instalações e recuperação após falha, usando servidor HTTP de loopback e pastas temporárias. Para verificar também o **pack real publicado nos três formatos**, com download de todos os mods e validação dos arquivos instalados:
 
 ```sh
 npm run verify:live
 ```
 
-Essa verificação também usa uma pasta temporária e remove os dados ao terminar.
+Essa verificação também usa pastas temporárias e remove os dados ao terminar. Ela confere arquivos e registros de instância; a autenticação e a execução real do jogo são feitas no launcher do jogador.
 
 ## Publicar uma versão do modpack
 
