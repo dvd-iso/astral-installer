@@ -2,6 +2,12 @@
 
 Escolha no aplicativo entre **Minecraft Launcher**, **SKlauncher 4**, **Prism Launcher** e **Modrinth App**. Cada opção mantém sua própria instalação, estado de atualização e backups.
 
+### Novidades da versão 1.4.0
+
+- Nova tela inicial no estilo de biblioteca de jogos: o launcher em destaque fica no centro e os outros giram ao redor. Troque pela roda do mouse, pelas setas do teclado, arrastando ou clicando nos cartões laterais; **Enter** escolhe.
+- Cada launcher pinta o seletor e o fundo com a sua cor, com faíscas, partículas, nome decodificado e novos sons de navegação e confirmação.
+- Janela padrão mais compacta.
+
 ### Novidades da versão 1.3.1
 
 - Os quatro launchers ficam numa grade 2x2 ao lado do texto de boas-vindas.
