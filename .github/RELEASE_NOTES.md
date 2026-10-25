@@ -2,6 +2,13 @@
 
 Escolha no aplicativo entre **Minecraft Launcher**, **SKlauncher 4** e **Prism Launcher**. Cada opção mantém sua própria instalação, estado de atualização e backups.
 
+### Novidades da versão 1.2.0
+
+- Nova tela inicial com três cartões grandes, um para cada launcher. Ao clicar, abre a instalação específica daquele launcher; **← Escolher outro launcher** (ou Esc) volta.
+- Animações: céu com aurora e estrelas cadentes, cartões com inclinação 3D e brilho seguindo o mouse, transições entre telas, etapas da instalação destacadas e uma explosão de estrelas ao concluir.
+- Efeitos sonoros originais, sintetizados no aplicativo, para escolha de launcher, instalação, cada etapa, conclusão, erros e cancelamento.
+- Botões **Som ligado** e **Animações** no topo. A escolha fica salva, e o movimento é desativado automaticamente quando o sistema pede movimento reduzido.
+
 ### Novidades da versão 1.1.0
 
 - Seletor dos três launchers na interface, com a última escolha e as pastas lembradas separadamente.
@@ -13,7 +20,7 @@ Escolha no aplicativo entre **Minecraft Launcher**, **SKlauncher 4** e **Prism L
 ### Como usar
 
 1. Abra o launcher escolhido pelo menos uma vez e feche-o antes de instalar.
-2. Abra o Astral Installer, escolha seu launcher e clique em **Instalar Astral**.
+2. Abra o Astral Installer, clique no cartão do seu launcher e depois em **Instalar Astral**.
 3. Abra o launcher e selecione **Astral**.
 
 No **SKlauncher 4**, a primeira preparação do Minecraft/Java é concluída usando **Instalar** na instância Astral. Atualizações que mudam apenas os mods mantêm essa preparação; uma mudança na versão do jogo ou do Fabric solicita nova preparação pelo SKlauncher. O suporte nativo do aplicativo é para o SKlauncher 4.

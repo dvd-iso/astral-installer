@@ -7,49 +7,82 @@
   <title>Astral Installer</title>
   <link rel="stylesheet" href="app.css">
 </head>
-<body>
-  <div class="sky" aria-hidden="true"></div>
+<body data-screen="home">
+  <div class="sky" aria-hidden="true"><div class="aurora aurora-one"></div><div class="aurora aurora-two"></div><i class="shooting-star"></i><i class="shooting-star second"></i></div>
   <header class="topbar">
     <div class="brand"><img src="../../assets/icon.png" width="42" height="42" alt=""><span>ASTRAL <small>INSTALLER</small></span></div>
-    <span class="platform" id="platform">Windows · macOS · Linux</span>
+    <div class="topbar-actions">
+      <button id="soundToggle" class="effect-toggle" type="button" aria-pressed="true" title="Silenciar efeitos sonoros"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9h4l5-4v14l-5-4H4Z"/><path class="sound-waves" d="M17 8a6 6 0 0 1 0 8m3-11a10 10 0 0 1 0 14"/></svg><span id="soundLabel">Som ligado</span></button>
+      <button id="motionToggle" class="effect-toggle" type="button" aria-pressed="true" title="Pausar animações"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m12 3 2.5 6.5L21 12l-6.5 2.5L12 21l-2.5-6.5L3 12l6.5-2.5Z"/></svg><span id="motionLabel">Animações</span></button>
+    </div>
   </header>
   <main>
-    <section class="intro">
-      <p class="eyebrow">UM MUNDO. MUITAS HISTÓRIAS.</p>
-      <h1>Seu próximo capítulo<br>começa <span>aqui.</span></h1>
-      <p class="lead">O Astral, pronto no seu launcher.</p>
-    </section>
-    <fieldset class="launcher-selector">
-      <legend>Onde você quer jogar?</legend>
-      <div class="launcher-choices">
-        <label class="launcher-choice"><input type="radio" name="launcher" value="official" checked><span><strong>Minecraft Launcher</strong><small>Launcher oficial</small></span></label>
-        <label class="launcher-choice"><input type="radio" name="launcher" value="sklauncher"><span><strong>SKlauncher</strong><small>Versão 4 · instância própria</small></span></label>
-        <label class="launcher-choice"><input type="radio" name="launcher" value="prism"><span><strong>Prism Launcher</strong><small>Normal, portátil ou Flatpak</small></span></label>
+    <section id="homeScreen" class="screen home-screen" aria-labelledby="homeTitle">
+      <div class="intro home-intro">
+        <p class="eyebrow"><span class="tiny-star" aria-hidden="true">✦</span> SEU PRÓXIMO CAPÍTULO</p>
+        <h1 id="homeTitle">Seu mundo começa<br>com uma <span>escolha.</span></h1>
+        <p class="lead">Qual launcher você usa para jogar?</p>
       </div>
-    </fieldset>
-    <section class="pack-card" aria-labelledby="packName">
-      <div class="card-top"><p class="eyebrow">MODPACK OFICIAL DO ASTRAL</p><span class="badge" id="badge">Consultando…</span></div>
-      <h2 id="packName">Astral</h2>
-      <div class="versions"><span id="minecraftVersion">Minecraft —</span><span id="fabricVersion">Fabric —</span><span id="packVersion">Pack —</span></div>
-      <p id="installedVersion" class="muted">Verificando instalação local…</p>
-      <p id="releaseNotes" class="release-notes" hidden></p>
-      <div class="progress-panel" id="progressPanel" hidden>
-        <div class="progress-heading"><span id="progressText" role="status" aria-live="polite">Preparando…</span><span id="progressValue"></span></div>
-        <progress id="progress" max="100" aria-label="Progresso da instalação"></progress>
-        <p class="file-name" id="progressFile"></p>
+      <div class="launcher-grid" id="launcherGrid" role="group" aria-label="Escolha seu launcher">
+        <button class="launcher-card card-official" data-launcher="official" type="button" aria-controls="installScreen">
+          <span class="card-topline"><span class="card-number">01 / OFICIAL</span><span class="card-arrow" aria-hidden="true">↗</span></span>
+          <span class="card-art"><span class="icon-orbit" aria-hidden="true"></span><img src="../../assets/launchers/minecraft.svg" width="88" height="88" alt=""></span>
+          <span class="launcher-card-name">Minecraft Launcher</span>
+          <span class="launcher-card-description">O launcher oficial do Minecraft</span>
+          <span class="launcher-card-action">Preparar meu Astral <span aria-hidden="true">→</span></span>
+        </button>
+        <button class="launcher-card card-sklauncher" data-launcher="sklauncher" type="button" aria-controls="installScreen">
+          <span class="card-topline"><span class="card-number">02 / SKLAUNCHER 4</span><span class="card-arrow" aria-hidden="true">↗</span></span>
+          <span class="card-art"><span class="icon-orbit" aria-hidden="true"></span><img src="../../assets/launchers/sklauncher.svg" width="76" height="76" alt=""></span>
+          <span class="launcher-card-name">SKlauncher</span>
+          <span class="launcher-card-description">Uma instância pronta na sua biblioteca</span>
+          <span class="launcher-card-action">Preparar meu Astral <span aria-hidden="true">→</span></span>
+        </button>
+        <button class="launcher-card card-prism" data-launcher="prism" type="button" aria-controls="installScreen">
+          <span class="card-topline"><span class="card-number">03 / PRISM</span><span class="card-arrow" aria-hidden="true">↗</span></span>
+          <span class="card-art"><span class="icon-orbit" aria-hidden="true"></span><img src="../../assets/launchers/prism.svg" width="88" height="88" alt=""></span>
+          <span class="launcher-card-name">Prism Launcher</span>
+          <span class="launcher-card-description">Seu pack, do seu jeito de jogar</span>
+          <span class="launcher-card-action">Preparar meu Astral <span aria-hidden="true">→</span></span>
+        </button>
       </div>
-      <p id="notice" class="notice" role="status" aria-live="polite" hidden></p>
-      <div class="actions"><button id="install" class="primary" disabled>Preparando… <span aria-hidden="true">↓</span></button><button id="check" class="secondary">Buscar atualizações</button><button id="cancel" class="secondary" hidden>Cancelar</button></div>
-      <button id="launch" class="launch" hidden>Abrir Minecraft Launcher <span aria-hidden="true">↗</span></button>
-      <p class="hint" id="launcherHint">Feche o jogo e o launcher para instalar ou atualizar. Depois, selecione Astral no launcher escolhido.</p>
+      <p class="home-note"><span class="status-dot" aria-hidden="true"></span> Instale, atualize e volte para a aventura.</p>
+      <p id="homeNotice" class="notice error" role="status" aria-live="polite" hidden></p>
     </section>
-    <section class="location" aria-labelledby="locationTitle">
-      <div><h2 id="locationTitle">Uma pasta só para o Astral</h2><p id="gameDir" class="path">Detectando pasta…</p><p class="muted">Seus mundos, capturas e preferências ficam preservados nas atualizações.</p></div>
-      <button id="choose" class="text-button">Localizar launcher</button>
+
+    <section id="installScreen" class="screen install-screen" aria-labelledby="launcherTitle" hidden inert>
+      <nav class="back-navigation" aria-label="Etapas da instalação"><button id="back" class="back-button" type="button"><span aria-hidden="true">←</span> Escolher outro launcher</button><span class="step-label">02 / PREPARAR O ASTRAL</span></nav>
+      <div class="installer-intro">
+        <div class="selected-launcher-icon"><img id="launcherIcon" src="../../assets/launchers/minecraft.svg" width="56" height="56" alt=""></div>
+        <div><p class="eyebrow">SEU LAUNCHER. SUA AVENTURA.</p><h1 id="launcherTitle" tabindex="-1">Minecraft Launcher</h1><p class="lead" id="launcherSubtitle">Vamos preparar o seu próximo capítulo.</p></div>
+      </div>
+      <section class="pack-card" id="packCard" aria-labelledby="packName">
+        <div class="success-burst" id="successBurst" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
+        <div class="card-top"><p class="eyebrow"><span class="tiny-star" aria-hidden="true">✦</span> EXPERIÊNCIA COMPLETA</p><span class="badge" id="badge">Consultando…</span></div>
+        <div class="pack-heading"><div><h2 id="packName">Astral</h2><p id="installedVersion" class="muted">Verificando sua instalação…</p></div><span class="pack-emblem" aria-hidden="true">✦</span></div>
+        <div class="versions"><span id="minecraftVersion">Minecraft —</span><span id="fabricVersion">Fabric —</span><span id="packVersion">Pack —</span></div>
+        <p id="releaseNotes" class="release-notes" hidden></p>
+        <div class="progress-panel" id="progressPanel" hidden>
+          <ol class="install-stages" aria-label="Etapas da instalação"><li data-stage="0"><span>01</span> Baixar arquivos</li><li data-stage="1"><span>02</span> Preparar launcher</li><li data-stage="2"><span>03</span> Tudo pronto</li></ol>
+          <div class="progress-heading"><span id="progressText" role="status" aria-live="polite">Preparando…</span><span id="progressValue"></span></div>
+          <progress id="progress" max="100" aria-label="Progresso da instalação"></progress>
+          <p class="file-name" id="progressFile"></p>
+        </div>
+        <p id="notice" class="notice" role="status" aria-live="polite" hidden></p>
+        <div class="actions"><button id="install" class="primary" type="button" disabled><span id="installLabel">Preparando…</span><span id="installArrow" aria-hidden="true">↓</span></button><button id="check" class="secondary" type="button">Buscar atualizações</button><button id="cancel" class="secondary cancel-button" type="button" hidden>Cancelar</button></div>
+        <button id="launch" class="launch" type="button" hidden><span id="launchLabel">Abrir Minecraft Launcher</span><span aria-hidden="true">↗</span></button>
+        <p class="hint" id="launcherHint">Feche o jogo e o launcher antes de instalar ou atualizar.</p>
+      </section>
+      <section class="location" aria-labelledby="locationTitle">
+        <div class="folder-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M3 7h7l2 2h9v11H3Zm0 0V4h7l2 3"/></svg></div>
+        <div><h2 id="locationTitle">Uma pasta só para o Astral</h2><p id="gameDir" class="path">Detectando pasta…</p><p class="muted">Seus mundos e preferências ficam preservados.</p></div>
+        <button id="choose" class="text-button" type="button">Localizar launcher</button>
+      </section>
+      <details class="help"><summary>Precisa de uma mão? <span aria-hidden="true">+</span></summary><p id="launcherHelp">Configure sua conta diretamente no launcher escolhido.</p><div class="help-links"><button data-link="launcher" id="downloadLauncher" type="button">Baixar launcher</button><button id="openGame" type="button">Modpack e backups</button><button id="openLogs" type="button">Logs do instalador</button><button data-link="releases" type="button">Atualizar aplicativo</button></div></details>
     </section>
-    <details class="help"><summary>Ajuda e arquivos</summary><p id="launcherHelp">Faça login diretamente no launcher escolhido. Cada launcher mantém sua própria instalação e seus próprios backups do Astral.</p><div class="help-links"><button data-link="launcher" id="downloadLauncher">Baixar launcher</button><button id="openGame">Pasta do modpack e backups</button><button id="openLogs">Pasta de logs</button><button data-link="releases">Atualizar este aplicativo</button></div></details>
   </main>
-  <footer><button data-link="website">astralmc.online <span aria-hidden="true">↗</span></button><span id="appVersion">Astral Installer</span></footer>
+  <footer><button data-link="website" type="button">astralmc.online <span aria-hidden="true">↗</span></button><span id="platform">Windows · macOS · Linux</span><span id="appVersion">Astral Installer</span></footer>
+  <script src="effects.js"></script>
   <script src="app.js"></script>
 </body>
 </html>

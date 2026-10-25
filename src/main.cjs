@@ -89,7 +89,13 @@ function createWindow() {
             if (state.launcher !== launcher || !state.gameDir || state.busy) return false;
           }
           await window.astral.selectLauncher(initial.launcher);
-          return Boolean(document.querySelector('#install') && document.querySelectorAll('[name="launcher"]').length === 3 && !window.require);
+          const cards = document.querySelectorAll('.launcher-card');
+          if (cards.length !== 3 || !window.AstralEffects || window.require) return false;
+          cards[2].click();
+          for (let i = 0; i < 50 && document.getElementById('installScreen').hidden; i++) await new Promise((resolve) => setTimeout(resolve, 100));
+          const opened = !document.getElementById('installScreen').hidden && document.getElementById('homeScreen').hidden && document.getElementById('launcherTitle').textContent === 'Prism Launcher';
+          await window.astral.selectLauncher(initial.launcher);
+          return opened && Boolean(document.querySelector('#install'));
         })()`);
         if (!valid) throw new Error("Interface ou preload indisponível.");
         console.log("Interface Electron e IPC carregados.");

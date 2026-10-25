@@ -31,9 +31,11 @@ Também há ZIPs para macOS e checksums SHA-256 em cada release. Os pacotes incl
 | SKlauncher 4 | `instances.json` | Selecione **Astral** e use **Instalar** no SKlauncher para preparar Minecraft/assets/Java. |
 | Prism Launcher | `prismlauncher.cfg` | A instância aparece na lista. Em instalações portáteis, encontre a raiz em **Pastas → Pasta do launcher**. |
 
-Para atualizar, reabra o instalador, **selecione o mesmo launcher**, clique em **Buscar atualizações** e depois em **Atualizar modpack**. A consulta também acontece ao abrir o aplicativo. Quando não há nova versão, **Verificar e reparar** recupera mods ausentes ou corrompidos. O botão **Atualizar este aplicativo**, em Ajuda, leva às releases do próprio instalador.
+Para atualizar, reabra o instalador, **selecione o mesmo launcher**, clique em **Buscar atualizações** e depois em **Atualizar modpack**. A consulta também acontece ao abrir o aplicativo. Quando não há nova versão, **Verificar e reparar** recupera mods ausentes ou corrompidos. O botão **Atualizar aplicativo**, em **Precisa de uma mão?**, leva às releases do próprio instalador.
 
 O aplicativo lembra a última escolha e a pasta de cada launcher. Instalar no Prism não modifica uma instalação do SKlauncher ou do launcher oficial. Quem usa a versão 1.0 pode atualizar o aplicativo: a instalação oficial existente continua no mesmo local.
+
+A tela inicial mostra um cartão para cada launcher; **← Escolher outro launcher** (ou Esc) volta para a escolha. Os efeitos sonoros são sintetizados no próprio aplicativo e podem ser desligados em **Som ligado**; **Animações** pausa o movimento, que também fica desativado quando o sistema pede movimento reduzido.
 
 ### Pasta do modpack
 
