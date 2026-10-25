@@ -125,7 +125,7 @@ O instalador acompanha **`channel/stable.json` na branch `main` deste repositór
 
 ### Pelo navegador (recomendado)
 
-1. Abra **[Nova release de modpack](https://github.com/dvd-iso/astral-installer/releases/new?tag=modpack-)** e complete a tag com um nome novo, por exemplo `modpack-2.1`.
+1. Abra **[astralmc.online/publicar-modpack.html](https://astralmc.online/publicar-modpack.html)**. A página abre o formulário de release do GitHub com uma tag nova já preenchida (`modpack-AAAAMMDD-HHMM`).
 2. Arraste o `.mrpack` para a área de anexos. Na descrição, escreva o que mudou: o texto aparece no aplicativo como novidades.
 3. Clique em **Publish release**.
 
