@@ -1,6 +1,6 @@
 {
   "name": "astral-installer",
-  "version": "1.2.0",
+  "version": "1.2.1",
   "description": "Instalador e atualizador do Astral para Minecraft Launcher, SKlauncher e Prism Launcher.",
   "private": true,
   "main": "src/main.cjs",

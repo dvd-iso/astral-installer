@@ -2,7 +2,7 @@
 
 Escolha no aplicativo entre **Minecraft Launcher**, **SKlauncher 4** e **Prism Launcher**. Cada opção mantém sua própria instalação, estado de atualização e backups.
 
-### Novidades da versão 1.2.0
+### Novidades da versão 1.2.1
 
 - Nova tela inicial com três cartões grandes, um para cada launcher. Ao clicar, abre a instalação específica daquele launcher; **← Escolher outro launcher** (ou Esc) volta.
 - Animações: céu com aurora e estrelas cadentes, cartões com inclinação 3D e brilho seguindo o mouse, transições entre telas, etapas da instalação destacadas e uma explosão de estrelas ao concluir.
