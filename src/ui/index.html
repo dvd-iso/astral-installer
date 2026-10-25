@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; connect-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'">
+  <title>Astral Installer</title>
+  <link rel="stylesheet" href="app.css">
+</head>
+<body>
+  <div class="sky" aria-hidden="true"></div>
+  <header class="topbar">
+    <div class="brand"><img src="../../assets/icon.png" width="42" height="42" alt=""><span>ASTRAL <small>INSTALLER</small></span></div>
+    <span class="platform" id="platform">Windows · macOS · Linux</span>
+  </header>
+  <main>
+    <section class="intro">
+      <p class="eyebrow">UM MUNDO. MUITAS HISTÓRIAS.</p>
+      <h1>Seu próximo capítulo<br>começa <span>aqui.</span></h1>
+      <p class="lead">O Astral, pronto no seu Minecraft Launcher.</p>
+    </section>
+    <section class="pack-card" aria-labelledby="packName">
+      <div class="card-top"><p class="eyebrow">MODPACK OFICIAL DO ASTRAL</p><span class="badge" id="badge">Consultando…</span></div>
+      <h2 id="packName">Astral</h2>
+      <div class="versions"><span id="minecraftVersion">Minecraft —</span><span id="fabricVersion">Fabric —</span><span id="packVersion">Pack —</span></div>
+      <p id="installedVersion" class="muted">Verificando instalação local…</p>
+      <p id="releaseNotes" class="release-notes" hidden></p>
+      <div class="progress-panel" id="progressPanel" hidden>
+        <div class="progress-heading"><span id="progressText" role="status" aria-live="polite">Preparando…</span><span id="progressValue"></span></div>
+        <progress id="progress" max="100" aria-label="Progresso da instalação"></progress>
+        <p class="file-name" id="progressFile"></p>
+      </div>
+      <p id="notice" class="notice" role="status" aria-live="polite" hidden></p>
+      <div class="actions"><button id="install" class="primary" disabled>Preparando… <span aria-hidden="true">↓</span></button><button id="check" class="secondary">Buscar atualizações</button><button id="cancel" class="secondary" hidden>Cancelar</button></div>
+      <button id="launch" class="launch" hidden>Abrir Minecraft Launcher <span aria-hidden="true">↗</span></button>
+      <p class="hint">Feche o jogo e o launcher para instalar ou atualizar. Depois, selecione o perfil <strong>Astral</strong> no launcher.</p>
+    </section>
+    <section class="location" aria-labelledby="locationTitle">
+      <div><h2 id="locationTitle">Uma pasta só para o Astral</h2><p id="gameDir" class="path">Detectando pasta…</p><p class="muted">Seus mundos, capturas e preferências ficam preservados nas atualizações.</p></div>
+      <button id="choose" class="text-button">Localizar launcher</button>
+    </section>
+    <details class="help"><summary>Ajuda e arquivos</summary><p>Use uma conta Microsoft com Minecraft Java no launcher oficial. Se o perfil não aparecer, habilite <strong>Modificadas</strong> na aba Instalações do launcher.</p><div class="help-links"><button data-link="launcher">Baixar launcher</button><button id="openGame">Pasta do modpack e backups</button><button id="openLogs">Pasta de logs</button><button data-link="releases">Atualizar este aplicativo</button></div></details>
+  </main>
+  <footer><button data-link="website">astralmc.online <span aria-hidden="true">↗</span></button><span id="appVersion">Astral Installer</span></footer>
+  <script src="app.js"></script>
+</body>
+</html>
