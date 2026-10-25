@@ -53,7 +53,7 @@ h1 span { color: #f2ce75; background: linear-gradient(90deg, #f2ce75, #ffe7ad, #
 .home-intro > :nth-child(2) { animation-delay: .07s; }
 .home-intro > :nth-child(3) { animation-delay: .14s; }
 @keyframes rise { from { opacity: 0; transform: translateY(14px); } }
-.launcher-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 14px; perspective: 900px; }
+.launcher-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; width: min(100%, 420px); perspective: 900px; }
 .launcher-card { --accent: #b48ae4; --tilt-x: 0deg; --tilt-y: 0deg; --pointer-x: 50%; --pointer-y: 50%; position: relative; overflow: hidden; aspect-ratio: 1; min-height: 0; display: flex; flex-direction: column; align-items: flex-start; text-align: left; padding: 18px; color: inherit; background: radial-gradient(circle at var(--pointer-x) var(--pointer-y), color-mix(in srgb, var(--accent) 22%, transparent), transparent 60%), linear-gradient(150deg, #1c1629, #100e1a); border: 1px solid #3b304d; transform: rotateX(var(--tilt-x)) rotateY(var(--tilt-y)); transform-style: preserve-3d; transition: transform .25s ease-out, border-color .25s, box-shadow .25s; animation: card-in .7s cubic-bezier(.2, .8, .2, 1) backwards; }
 .launcher-card:nth-child(1) { animation-delay: .12s; }
 .launcher-card:nth-child(2) { animation-delay: .2s; }
@@ -90,6 +90,15 @@ h1 span { color: #f2ce75; background: linear-gradient(90deg, #f2ce75, #ffe7ad, #
 .launcher-card:hover:not(:disabled) .launcher-card-action span { transform: translateX(4px); }
 .home-note { display: flex; align-items: center; gap: 9px; margin: 22px 0 0; font-size: 11px; color: #9c91af; animation: rise .6s .4s backwards; }
 .status-dot { width: 7px; height: 7px; border-radius: 50%; background: #8fdfb7; box-shadow: 0 0 0 0 #8fdfb766; animation: ping 2.2s ease-out infinite; }
+/* Texto à esquerda e os quatro launchers formando um quadrado à direita. */
+@media (min-width: 860px) {
+  .home-screen { display: grid; grid-template-columns: minmax(0, 1fr) 420px; grid-template-rows: 1fr auto auto auto 1fr; grid-template-areas: ". grid" "intro grid" "note grid" "notice grid" ". grid"; column-gap: 40px; align-content: center; min-height: calc(100vh - 190px); }
+  .home-intro { grid-area: intro; margin-bottom: 0; }
+  .home-intro h1 { font-size: 31px; }
+  .launcher-grid { grid-area: grid; align-self: center; }
+  .home-note { grid-area: note; }
+  #homeNotice { grid-area: notice; }
+}
 @keyframes ping { 70%, 100% { box-shadow: 0 0 0 8px #8fdfb700; } }
 
 /* Tela de instalação */
