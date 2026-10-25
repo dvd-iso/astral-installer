@@ -72,7 +72,7 @@ test("instala o pack e registra o perfil nos launchers clássico e Microsoft Sto
     assert.deepEqual(profiles.profiles.vanilla, f.profiles.profiles.vanilla);
     assert.deepEqual(profiles.settings, f.profiles.settings);
     assert.equal(profiles.selectedProfile, "vanilla");
-    assert.equal(profiles.profiles["astral-official"].gameDir, f.gameDir);
+    assert.equal(profiles.profiles["astral-official"].gameDir, await fs.realpath(f.gameDir));
     assert.equal(profiles.profiles["astral-official"].lastVersionId, "fabric-loader-0.19.5-26.3");
   }
   assert.equal((await installedState(f.gameDir)).version, "1.0.0");
