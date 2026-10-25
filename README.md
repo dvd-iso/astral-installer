@@ -131,6 +131,10 @@ O instalador acompanha **`channel/stable.json` na branch `main` deste repositór
 
 O workflow **Publicar modpack** baixa o arquivo anexado, valida o pack, testa a instalação nos três launchers e publica o canal na `main`. Em poucos minutos o aplicativo mostra **Atualizar modpack**, e a página de instalação do site exibe as novas versões. Se algo falhar, o canal continua como estava e o GitHub avisa por e-mail; a aba **Actions** mostra o motivo. O workflow devolve o selo de release mais recente ao Astral Installer.
 
+Pode exportar a instância do seu launcher como ela está. Dados locais que o export leva junto, como `.astral/`, `servers.dat`, `local/`, `downloads/`, logs e caches, são removidos do pack, e o anexo da release é trocado pelo pack limpo (`Astral-<versão>.mrpack`).
+
+Para reprocessar uma release já publicada, use **Actions → Publicar modpack → Run workflow** e informe a tag.
+
 Não apague releases de modpack: o canal baixa o pack do anexo da release publicada.
 
 ### Pela linha de comando

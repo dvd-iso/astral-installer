@@ -5,6 +5,12 @@ name: Publicar modpack
 on:
   release:
     types: [published]
+  # Reprocessa uma release já publicada, por exemplo depois de corrigir este workflow.
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "Tag da release de modpack (ex.: modpack-20261025-0356)"
+        required: true
 
 permissions:
   contents: write
@@ -15,8 +21,8 @@ concurrency:
 
 jobs:
   publicar:
-    name: Publicar ${{ github.event.release.name || github.event.release.tag_name }}
-    if: contains(join(github.event.release.assets.*.name, ' '), '.mrpack')
+    name: Publicar ${{ github.event.release.name || github.event.release.tag_name || inputs.tag }}
+    if: github.event_name == 'workflow_dispatch' || contains(join(github.event.release.assets.*.name, ' '), '.mrpack')
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
@@ -27,7 +33,9 @@ jobs:
           node-version: 24
           cache: npm
       - run: npm ci --omit=dev
-      - name: Validar o .mrpack e gerar o canal
+      - name: Limpar e validar o .mrpack e gerar o canal
+        env:
+          GH_TOKEN: ${{ github.token }}
         run: node scripts/publish-release-pack.cjs
       - name: Testar a instalação nos três launchers
         run: npm run verify:live
