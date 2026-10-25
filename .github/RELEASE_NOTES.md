@@ -2,6 +2,11 @@
 
 Escolha no aplicativo entre **Minecraft Launcher**, **SKlauncher 4**, **Prism Launcher** e **Modrinth App**. Cada opção mantém sua própria instalação, estado de atualização e backups.
 
+### Novidades da versão 1.3.1
+
+- Os quatro launchers ficam numa grade 2x2 ao lado do texto de boas-vindas.
+- Novo ícone para o cartão do Modrinth App.
+
 ### Novidades da versão 1.3.0
 
 - **Modrinth App**: novo cartão na tela inicial. O instalador baixa e verifica o pack do Astral e o abre no Modrinth App, que cria a instância Astral. Para atualizar, o novo arquivo fica em **Downloads/Astral**; no Modrinth App, use **Configurações → Instalação → Reinstalar modpack** na instância Astral.
