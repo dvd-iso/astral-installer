@@ -2,7 +2,7 @@ const fs = require("node:fs/promises");
 const path = require("node:path");
 const os = require("node:os");
 const { exists, safeTarget, readJson, jsonBytes } = require("./files.cjs");
-const { minecraftDirectories, launcherFiles, prepareRuntime, profileOperations } = require("./launcher.cjs");
+const { minecraftDirectories, launcherFiles, prepareRuntime, profileOperations, instanceName, managedIcon, iconBytes, iconDataUrl } = require("./launcher.cjs");
 
 const INSTANCE_ID = "astral-installer";
 const LAUNCHERS = Object.freeze({
@@ -124,7 +124,8 @@ async function installationTarget(id, directory, { validate = false } = {}) {
   const instanceDir = await safeTarget(instancesDir, INSTANCE_ID);
   // A instância é própria; novas instalações usam o nome atual do Prism, minecraft/.
   const gameDir = path.join(instanceDir, "minecraft");
-  return { id, name: info.name, launcherDir, instanceDir, gameDir, roots: { game: gameDir, instance: instanceDir, launcher: launcherDir } };
+  const iconsDir = path.resolve(launcherDir, iniValue(text, "IconsDir") || "icons");
+  return { id, name: info.name, launcherDir, instanceDir, gameDir, roots: { game: gameDir, instance: instanceDir, launcher: launcherDir, icons: iconsDir } };
 }
 
 async function verifyOwnership(target) {
@@ -167,18 +168,23 @@ async function registrationOperations(target, channel, runtime) {
       components.push(existing?.version === version ? { ...existing, uid, version, important: true } : { uid, version, important: true });
     }
     components.push(...pack.components.filter((component) => !managed.has(component.uid)));
+    // O Prism procura o ícone pela chave, sem extensão, na pasta de ícones configurada.
+    const ownIcon = managedIcon(iniValue(previous, "iconKey"), INSTANCE_ID);
+    const icon = ownIcon ? [{ root: "icons", path: `${INSTANCE_ID}.png`, data: await iconBytes() }] : [];
     return { operations: [
+      ...icon,
       { root: "instance", path: "mmc-pack.json", data: jsonBytes({ ...pack, formatVersion: 1, components }) },
-      { root: "instance", path: "instance.cfg", data: updateIni(previous, { InstanceType: "OneSix", name: "Astral" }) },
+      { root: "instance", path: "instance.cfg", data: updateIni(previous, { InstanceType: "OneSix", name: instanceName(iniValue(previous, "name")), ...(ownIcon && { iconKey: INSTANCE_ID }) }) },
     ], needsPreparation: false };
   }
   const store = await sklauncherStore(target.launcherDir);
   const previous = store.instances.find((instance) => instance.id === INSTANCE_ID);
   if (previous && previous.astralInstaller !== true) throw new Error("A instância do SKlauncher não é gerenciada pelo Astral Installer.");
   const sameRuntime = previous?.versionId === runtime.loaderId;
+  const icon = await iconDataUrl();
   const entry = {
-    ...previous, id: INSTANCE_ID, name: "Astral", type: "custom", astralInstaller: true,
-    icon: previous?.icon || "Furnace", versionId: runtime.loaderId, gameType: "fabric",
+    ...previous, id: INSTANCE_ID, name: instanceName(previous?.name), type: "custom", astralInstaller: true,
+    icon: managedIcon(previous?.icon, icon) ? icon : previous.icon, versionId: runtime.loaderId, gameType: "fabric",
     minecraftVersion: channel.minecraftVersion, loaderVersion: channel.fabricLoader, directory: target.gameDir,
     createdAt: previous?.createdAt || new Date().toISOString(),
     playTime: previous?.playTime || 0, sessionCount: previous?.sessionCount || 0, playTimeByDay: previous?.playTimeByDay || {},

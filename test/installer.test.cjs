@@ -10,7 +10,7 @@ const { hashBuffer, hashFile, readJson, jsonBytes, exists, relativePath, safeTar
 const { readPack, packPath } = require("../src/core/pack.cjs");
 const { withInstallLock, recoverTransaction } = require("../src/core/transaction.cjs");
 const { downloadUrl } = require("../src/core/network.cjs");
-const { minecraftDirectories, mavenArtifact } = require("../src/core/launcher.cjs");
+const { minecraftDirectories, mavenArtifact, iconDataUrl, iconBytes } = require("../src/core/launcher.cjs");
 const { installationTarget, INSTANCE_ID, launcherDirectories, iniValue, updateIni, launcherInfo } = require("../src/core/launchers.cjs");
 const { processesAreBusy } = require("../src/desktop.cjs");
 
@@ -405,4 +405,50 @@ test("migra o estado da versão 1.0 sem recriar a instalação oficial", async (
   const result = await install(f.options);
   assert.equal(result.state.launcher, "official");
   assert.equal(result.gameDir, await fs.realpath(f.gameDir));
+});
+
+test("dá nome e ícone do Astral às instalações e preserva as personalizações do jogador", async (t) => {
+  const f = await fixture(t);
+  const icon = await iconDataUrl();
+  const profileFile = path.join(f.minecraftDir, "launcher_profiles.json");
+  // Perfil criado pelas versões 1.0 e 1.1, com nome e ícone padrões.
+  const legacy = await readJson(profileFile);
+  legacy.profiles["astral-official"] = { name: "Astral 2.0", icon: "Gold_Block", type: "custom" };
+  await fs.writeFile(profileFile, jsonBytes(legacy));
+  f.publish("1.0.0");
+  await install(f.options);
+  let profile = (await readJson(profileFile)).profiles["astral-official"];
+  assert.equal(profile.name, "Astral");
+  assert.equal(profile.icon, icon);
+  assert.match(profile.icon, /^data:image\/png;base64,/);
+
+  const sk = await nativeLauncher(f, "sklauncher");
+  await install(sk.options);
+  let instance = (await readJson(path.join(sk.launcherDir, "instances.json"))).instances.find((item) => item.id === INSTANCE_ID);
+  assert.equal(instance.name, "Astral");
+  assert.equal(instance.icon, icon);
+
+  const prism = await nativeLauncher(f, "prism");
+  await install(prism.options);
+  const config = path.join(prism.target.instanceDir, "instance.cfg");
+  assert.equal(iniValue(await fs.readFile(config, "utf8"), "name"), "Astral");
+  assert.equal(iniValue(await fs.readFile(config, "utf8"), "iconKey"), INSTANCE_ID);
+  assert.deepEqual(await fs.readFile(path.join(prism.launcherDir, "icons", `${INSTANCE_ID}.png`)), await iconBytes());
+
+  // Nomes e ícones escolhidos no launcher sobrevivem às atualizações.
+  const profiles = await readJson(profileFile);
+  Object.assign(profiles.profiles["astral-official"], { name: "Meu Astral", icon: "Diamond_Block" });
+  await fs.writeFile(profileFile, jsonBytes(profiles));
+  const store = await readJson(path.join(sk.launcherDir, "instances.json"));
+  Object.assign(store.instances.find((item) => item.id === INSTANCE_ID), { name: "Servidor do Davi", icon: "Glowstone" });
+  await fs.writeFile(path.join(sk.launcherDir, "instances.json"), jsonBytes(store));
+  await fs.writeFile(config, updateIni(await fs.readFile(config, "utf8"), { name: "Meu pack", iconKey: "fluxer-icon" }));
+  f.publish("1.1.0");
+  for (const options of [f.options, sk.options, prism.options]) await install(options);
+  profile = (await readJson(profileFile)).profiles["astral-official"];
+  assert.deepEqual([profile.name, profile.icon], ["Meu Astral", "Diamond_Block"]);
+  instance = (await readJson(path.join(sk.launcherDir, "instances.json"))).instances.find((item) => item.id === INSTANCE_ID);
+  assert.deepEqual([instance.name, instance.icon], ["Servidor do Davi", "Glowstone"]);
+  const text = await fs.readFile(config, "utf8");
+  assert.deepEqual([iniValue(text, "name"), iniValue(text, "iconKey")], ["Meu pack", "fluxer-icon"]);
 });

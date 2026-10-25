@@ -6,6 +6,21 @@ const { fetchJson, fetchBuffer, downloadVerified } = require("./network.cjs");
 const settings = require("../settings.cjs");
 
 const PROFILE_FILES = ["launcher_profiles.json", "launcher_profiles_microsoft_store.json"];
+const ICON_FILE = path.join(__dirname, "..", "..", "assets", "icon.png");
+// Ícones padrão usados por versões anteriores do instalador ou pelos launchers.
+const DEFAULT_ICONS = new Set(["", "default", "Gold_Block", "Furnace"]);
+
+// A instância se chama Astral; um nome escolhido pelo jogador no launcher é preservado.
+function instanceName(previous) {
+  return !previous || /^Astral(?: [\w.-]+)?$/.test(previous) ? settings.profileName : previous;
+}
+
+function managedIcon(previous, ours) {
+  return previous === undefined || previous === null || DEFAULT_ICONS.has(previous) || previous === ours;
+}
+
+async function iconBytes() { return fs.readFile(ICON_FILE); }
+async function iconDataUrl() { return `data:image/png;base64,${(await iconBytes()).toString("base64")}`; }
 const DEFAULT_ENDPOINTS = {
   minecraft: "https://piston-meta.mojang.com/mc/game/version_manifest_v2.json",
   fabric: "https://meta.fabricmc.net/v2",
@@ -99,22 +114,24 @@ async function prepareRuntime(channel, minecraftDir, stage, cacheDir, options = 
 
 async function profileOperations(minecraftDir, gameDir, loaderId) {
   const operations = [];
+  const icon = await iconDataUrl();
   for (const { name, data } of await launcherFiles(minecraftDir)) {
     const previous = data.profiles?.[settings.profileId];
     const profiles = { ...data.profiles };
     profiles[settings.profileId] = {
       ...previous,
-      name: settings.profileName,
+      name: instanceName(previous?.name),
       type: "custom",
       created: previous?.created || new Date().toISOString(),
       lastUsed: previous?.lastUsed || new Date().toISOString(),
       lastVersionId: loaderId,
       gameDir,
-      icon: "Gold_Block",
+      icon: managedIcon(previous?.icon, icon) ? icon : previous.icon,
     };
     operations.push({ root: "minecraft", path: name, data: jsonBytes({ ...data, profiles }) });
   }
   return operations;
 }
 
-module.exports = { minecraftDirectories, detectMinecraftDirectory, launcherFiles, prepareRuntime, profileOperations, mavenArtifact };
+module.exports = { minecraftDirectories, detectMinecraftDirectory, launcherFiles, prepareRuntime, profileOperations, mavenArtifact,
+  instanceName, managedIcon, iconBytes, iconDataUrl };
