@@ -74,7 +74,7 @@ function progress(detail) {
 
 function createWindow() {
   window = new BrowserWindow({
-    width: 980, height: 800, minWidth: 720, minHeight: 660,
+    width: 900, height: 700, minWidth: 720, minHeight: 640,
     title: "Astral Installer", backgroundColor: "#090912", show: false,
     icon: path.join(__dirname, "..", "assets", "icon.png"),
     autoHideMenuBar: true,
@@ -104,6 +104,10 @@ function createWindow() {
           await window.astral.selectLauncher(initial.launcher);
           const cards = document.querySelectorAll('.launcher-card');
           if (cards.length !== 4 || !window.AstralEffects || window.require) return false;
+          // O primeiro clique traz o cartão para o centro do seletor; o segundo escolhe o launcher.
+          cards[2].click();
+          await new Promise((resolve) => setTimeout(resolve, 450));
+          if (cards[2].dataset.pos !== '0') return false;
           cards[2].click();
           for (let i = 0; i < 150 && document.getElementById('installScreen').hidden; i++) await new Promise((resolve) => setTimeout(resolve, 100));
           const opened = !document.getElementById('installScreen').hidden && document.getElementById('homeScreen').hidden && document.getElementById('launcherTitle').textContent === 'Prism Launcher';

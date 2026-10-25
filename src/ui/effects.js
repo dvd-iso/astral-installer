@@ -10,7 +10,12 @@
   let lastHover = 0;
   let generation = 0;
   const voices = new Set();
+  let noise;
+  // [frequência, início, duração, timbre, volume, frequência final]. "noise" é ruído filtrado com varredura.
   const notes = {
+    tick: [[1046.5, 0, .05, "triangle", .15], [1567.98, .022, .07, "sine", .08]],
+    swipe: [[600, 0, .24, "noise", .2, 2800]],
+    confirm: [[392, 0, .14, "triangle", .15, 784], [783.99, .08, .3, "sine", .18], [1174.66, .17, .38, "sine", .14], [1567.98, .26, .45, "sine", .09], [400, 0, .5, "noise", .14, 5000]],
     hover: [[880, 0, .045, "sine", .10]],
     click: [[523.25, 0, .07, "triangle", .20], [783.99, .035, .09, "sine", .12]],
     back: [[659.25, 0, .09, "sine", .23], [440, .07, .15, "sine", .18]],
@@ -76,7 +81,15 @@
     voices.clear();
   }
 
-  async function play(name) {
+  function noiseBuffer() {
+    if (noise) return noise;
+    noise = audio.createBuffer(1, audio.sampleRate, audio.sampleRate);
+    const data = noise.getChannelData(0);
+    for (let index = 0; index < data.length; index++) data[index] = Math.random() * 2 - 1;
+    return noise;
+  }
+
+  async function play(name, { pitch = 1 } = {}) {
     if (!sound || !notes[name]) return;
     if (name === "hover") {
       if (performance.now() - lastHover < 150 || !audio || audio.state !== "running") return;
@@ -85,18 +98,32 @@
     const request = generation;
     if (!await unlock() || !sound || request !== generation || voices.size > 16) return;
     const start = audio.currentTime + .008;
-    for (const [frequency, offset, duration, type, volume] of notes[name]) {
-      const oscillator = audio.createOscillator();
+    for (const [frequency, offset, duration, type, volume, glide] of notes[name]) {
       const envelope = audio.createGain();
-      oscillator.type = type;
-      oscillator.frequency.setValueAtTime(frequency, start + offset);
+      let oscillator, tone;
+      if (type === "noise") {
+        oscillator = audio.createBufferSource();
+        oscillator.buffer = noiseBuffer();
+        tone = audio.createBiquadFilter();
+        tone.type = "bandpass";
+        tone.Q.value = 1.4;
+        tone.frequency.setValueAtTime(frequency * pitch, start + offset);
+        if (glide) tone.frequency.exponentialRampToValueAtTime(glide * pitch, start + offset + duration);
+        oscillator.connect(tone);
+        tone.connect(envelope);
+      } else {
+        oscillator = audio.createOscillator();
+        oscillator.type = type;
+        oscillator.frequency.setValueAtTime(frequency * pitch, start + offset);
+        if (glide) oscillator.frequency.exponentialRampToValueAtTime(glide * pitch, start + offset + duration);
+        oscillator.connect(envelope);
+      }
       envelope.gain.setValueAtTime(0, start + offset);
       envelope.gain.linearRampToValueAtTime(volume, start + offset + .012);
       envelope.gain.exponentialRampToValueAtTime(.0001, start + offset + duration);
-      oscillator.connect(envelope);
       envelope.connect(master);
       voices.add(oscillator);
-      oscillator.onended = () => { voices.delete(oscillator); oscillator.disconnect(); envelope.disconnect(); };
+      oscillator.onended = () => { voices.delete(oscillator); oscillator.disconnect(); tone?.disconnect(); envelope.disconnect(); };
       oscillator.start(start + offset);
       oscillator.stop(start + offset + duration + .02);
     }
@@ -145,7 +172,7 @@
     card.addEventListener("pointerenter", () => { if (!card.disabled) void play("hover"); });
     card.addEventListener("focus", () => { if (card.matches(":focus-visible")) void play("hover"); });
     card.addEventListener("pointermove", (event) => {
-      if (!motionEnabled() || card.disabled || event.pointerType === "touch") return;
+      if (!motionEnabled() || card.disabled || card.dataset.pos !== "0" || event.pointerType === "touch") return;
       const bounds = card.getBoundingClientRect();
       const x = Math.max(0, Math.min(1, (event.clientX - bounds.left) / bounds.width));
       const y = Math.max(0, Math.min(1, (event.clientY - bounds.top) / bounds.height));

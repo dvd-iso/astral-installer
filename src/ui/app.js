@@ -22,6 +22,14 @@ const LAUNCHER_UI = {
     help: "Instale o Modrinth App e entre com sua conta nele. Na primeira instalação, o Modrinth App abre a importação do Astral: confirme mesmo com o aviso de modpack fora do Modrinth. Para atualizar, o novo arquivo fica na pasta mostrada abaixo; no Modrinth App, abra Astral → Configurações → Instalação → Reinstalar modpack e escolha esse arquivo. Se o app não abrir sozinho, arraste o arquivo para a janela dele.",
   },
 };
+const TAGLINES = {
+  official: "O launcher oficial do Minecraft",
+  sklauncher: "Uma instância pronta na sua biblioteca",
+  prism: "Seu pack, do seu jeito de jogar",
+  modrinth: "O pack verificado, importado pelo app",
+};
+const CARDS = [...document.querySelectorAll(".launcher-card")];
+const GLYPHS = "█▓▒░#*+✦ASTRL";
 const STAGES = { recovery: 0, check: 0, pack: 0, mods: 0, runtime: 1, commit: 1, done: 2 };
 let local;
 let channel;
@@ -30,6 +38,11 @@ let busy = false;
 let checking = false;
 let selecting = false;
 let stage = -1;
+let current = 0;
+let wheelTotal = 0;
+let wheelAt = 0;
+let wheelLock = 0;
+let scrambleToken = 0;
 
 function notice(message, error = false, target = screen === "home" ? "homeNotice" : "notice") {
   $(target).textContent = message;
@@ -52,12 +65,12 @@ function render() {
   if (!local) return;
   $("platform").textContent = `${{ win32: "Windows", darwin: "macOS", linux: "Linux" }[local.platform]} · ${local.arch === "arm64" ? "ARM64" : "64 bits"}`;
   $("appVersion").textContent = `Astral Installer ${local.appVersion}`;
-  document.querySelectorAll(".launcher-card").forEach((card) => {
+  CARDS.forEach((card) => {
     card.disabled = busy || selecting;
-    card.classList.toggle("last-used", card.dataset.launcher === local.launcher);
-    card.querySelector(".launcher-card-action").firstChild.textContent = card.dataset.launcher === local.launcher && local.installed ? "Voltar ao Astral " : "Preparar meu Astral ";
     card.classList.toggle("loading", selecting && card.dataset.launcher === selecting);
   });
+  document.querySelectorAll(".selector-arrow, .selector-pips button, #selectorGo").forEach((button) => { button.disabled = busy || selecting; });
+  labels();
   $("back").disabled = busy || selecting;
   const ui = LAUNCHER_UI[local.launcher];
   $("launcherIcon").src = ui.icon;
@@ -119,23 +132,122 @@ async function show(next, origin) {
     void effects.animate($("launcherIcon").parentElement, [{ transform: "scale(.4) rotate(-25deg)", opacity: 0 }, { transform: "scale(1.12) rotate(4deg)", opacity: 1, offset: .7 }, { transform: "none", opacity: 1 }], { duration: 520, delay: 80, easing: "ease-out", fill: "backwards" });
   } else {
     void effects.animate(to, [{ opacity: 0, transform: "translateX(-28px) scale(.985)" }, { opacity: 1, transform: "none" }], { duration: 320, easing: "cubic-bezier(.2, .8, .2, 1)" });
-    (origin || document.querySelector(".launcher-card.last-used") || document.querySelector(".launcher-card"))?.focus({ preventScroll: true });
+    (origin || CARDS[current])?.focus({ preventScroll: true });
   }
 }
 
-async function choose(card) {
+// Seletor da tela inicial: um launcher em destaque, os vizinhos em perspectiva e o oposto escondido atrás.
+function place() {
+  CARDS.forEach((card, index) => {
+    let offset = ((index - current) % CARDS.length + CARDS.length) % CARDS.length;
+    if (offset > CARDS.length / 2) offset -= CARDS.length;
+    card.dataset.pos = String(offset);
+    card.tabIndex = offset === 0 ? 0 : -1;
+    card.setAttribute("aria-current", String(offset === 0));
+  });
+  document.querySelectorAll(".selector-pips button").forEach((pip, index) => pip.setAttribute("aria-current", String(index === current)));
+}
+
+function labels() {
+  const lastUsed = Boolean(local) && CARDS[current].dataset.launcher === local.launcher;
+  $("selectorTag").hidden = !lastUsed;
+  $("selectorAction").textContent = lastUsed && local.installed ? "Voltar ao Astral" : "Preparar meu Astral";
+}
+
+function scramble(element, text) {
+  const token = ++scrambleToken;
+  if (!effects.motionEnabled()) { element.textContent = text; return; }
+  const started = performance.now();
+  const frame = (now) => {
+    if (token !== scrambleToken) return;
+    const revealed = Math.floor(Math.min(1, (now - started) / 380) * text.length);
+    element.textContent = [...text].map((char, index) => index < revealed || char === " " ? char : GLYPHS[Math.floor(Math.random() * GLYPHS.length)]).join("");
+    if (revealed < text.length) requestAnimationFrame(frame);
+  };
+  requestAnimationFrame(frame);
+}
+
+function describe(animated) {
+  const card = CARDS[current];
+  document.documentElement.style.setProperty("--theme", getComputedStyle(card).getPropertyValue("--accent").trim());
+  $("selectorIndex").textContent = String(current + 1).padStart(2, "0");
+  const name = card.querySelector(".launcher-card-name").textContent;
+  if (animated) scramble($("selectorName"), name);
+  else { scrambleToken++; $("selectorName").textContent = name; }
+  $("selectorDescription").textContent = TAGLINES[card.dataset.launcher];
+  if (animated) void effects.animate($("selectorDescription"), [{ opacity: 0, transform: "translateY(8px)" }, { opacity: 1, transform: "none" }], { duration: 360, easing: "cubic-bezier(.2, .8, .2, 1)" });
+  labels();
+}
+
+function retrigger(element, name) {
+  element.classList.remove(name);
+  void element.offsetWidth;
+  element.classList.add(name);
+}
+
+function burst(direction, count = 14) {
+  if (!effects.motionEnabled()) return;
+  for (let index = 0; index < count; index++) {
+    const spark = document.createElement("i");
+    spark.className = "spark";
+    const angle = Math.random() * Math.PI * 2;
+    const distance = 70 + Math.random() * 110;
+    spark.style.setProperty("--dx", `${Math.cos(angle) * distance + direction * 40}px`);
+    spark.style.setProperty("--dy", `${Math.sin(angle) * distance * .7}px`);
+    spark.style.animationDelay = `${Math.random() * 60}ms`;
+    $("launcherGrid").append(spark);
+    setTimeout(() => spark.remove(), 900);
+  }
+}
+
+function shockwave() {
+  if (!effects.motionEnabled()) return;
+  const ring = document.createElement("i");
+  ring.className = "shockwave";
+  $("launcherGrid").append(ring);
+  setTimeout(() => ring.remove(), 800);
+}
+
+function move(step) {
+  if (busy || selecting || !step || screen !== "home") return;
+  const focused = document.activeElement?.classList.contains("launcher-card");
+  current = (current + step + CARDS.length) % CARDS.length;
+  place();
+  describe(true);
+  void effects.play("tick", { pitch: 1 + current * .12 });
+  void effects.play("swipe", { pitch: step > 0 ? 1.15 : .85 });
+  burst(Math.sign(step));
+  retrigger(CARDS[current], "arrive");
+  retrigger($("selector"), "flash");
+  if (focused) CARDS[current].focus({ preventScroll: true });
+}
+
+function goTo(index) {
+  let step = index - current;
+  if (step > CARDS.length / 2) step -= CARDS.length;
+  if (step < -CARDS.length / 2) step += CARDS.length;
+  move(step);
+}
+
+async function choose(card = CARDS[current]) {
   if (busy || selecting) return;
   const id = card.dataset.launcher;
   selecting = id;
   render();
+  void effects.play("confirm");
   void effects.play(id);
+  shockwave();
+  burst(0, 22);
+  if (effects.motionEnabled()) retrigger(card, "launching");
   try {
     local = await window.astral.selectLauncher(id);
     notice("", false, "notice");
     selecting = false;
     render();
     await show("install");
+    card.classList.remove("launching");
   } catch (error) {
+    card.classList.remove("launching");
     selecting = false;
     render();
     void effects.play("error");
@@ -161,13 +273,64 @@ function celebrate() {
   setTimeout(() => card.classList.remove("celebrate"), 1400);
 }
 
-document.querySelectorAll(".launcher-card").forEach((card) => card.addEventListener("click", () => choose(card)));
+CARDS.forEach((card, index) => {
+  card.addEventListener("click", () => {
+    if (performance.now() - swipedAt < 400) return;
+    if (card.dataset.pos === "0") void choose(card);
+    else goTo(index);
+  });
+  const pip = document.createElement("button");
+  pip.type = "button";
+  pip.setAttribute("aria-label", card.querySelector(".launcher-card-name").textContent);
+  pip.addEventListener("click", () => goTo(index));
+  $("selectorPips").append(pip);
+});
+for (let index = 0; index < 16; index++) {
+  const mote = document.createElement("i");
+  mote.style.left = `${Math.random() * 100}%`;
+  mote.style.setProperty("--duration", `${5 + Math.random() * 5}s`);
+  mote.style.setProperty("--delay", `${-Math.random() * 10}s`);
+  mote.style.setProperty("--drift", `${(Math.random() - .5) * 60}px`);
+  $("selectorMotes").append(mote);
+}
+$("prevLauncher").addEventListener("click", () => move(-1));
+$("nextLauncher").addEventListener("click", () => move(1));
+$("selectorGo").addEventListener("click", () => choose());
+// Uma volta da roda do mouse troca um launcher; o trackpad acumula até um passo e respeita um intervalo.
+$("homeScreen").addEventListener("wheel", (event) => {
+  if (screen !== "home") return;
+  event.preventDefault();
+  const now = performance.now();
+  if (now - wheelAt > 250) wheelTotal = 0;
+  wheelAt = now;
+  if (now < wheelLock) return;
+  const delta = Math.abs(event.deltaX) > Math.abs(event.deltaY) ? event.deltaX : event.deltaY;
+  wheelTotal += event.deltaMode === 1 ? delta * 32 : delta;
+  if (Math.abs(wheelTotal) < 36) return;
+  move(Math.sign(wheelTotal));
+  wheelTotal = 0;
+  wheelLock = now + 170;
+}, { passive: false });
+let swipeFrom;
+let swipedAt = -Infinity;
+$("launcherGrid").addEventListener("pointerdown", (event) => { swipeFrom = event.clientX; });
+$("launcherGrid").addEventListener("pointerup", (event) => {
+  if (swipeFrom !== undefined && Math.abs(event.clientX - swipeFrom) > 50) { swipedAt = performance.now(); move(event.clientX < swipeFrom ? 1 : -1); }
+  swipeFrom = undefined;
+});
+place();
+describe(false);
 $("back").addEventListener("click", () => {
   if (busy || selecting) return;
   void effects.play("back");
-  void show("home", document.querySelector(`.launcher-card[data-launcher="${local?.launcher}"]`));
+  void show("home", CARDS[current]);
 });
 document.addEventListener("keydown", (event) => {
+  if (screen === "home" && !busy && !selecting && !event.altKey && !event.ctrlKey && !event.metaKey) {
+    const step = { ArrowLeft: -1, ArrowUp: -1, ArrowRight: 1, ArrowDown: 1 }[event.key];
+    if (step && !event.target.closest("details")) { event.preventDefault(); move(step); return; }
+    if (event.key === "Enter" && !event.target.closest("button, a, summary")) { event.preventDefault(); void choose(); return; }
+  }
   if (event.key === "Escape" && screen === "install" && !busy && !selecting && !event.target.closest("details[open]")) $("back").click();
 });
 
@@ -242,6 +405,13 @@ action($("openLogs"), () => window.astral.openFolder("logs"));
 document.querySelectorAll("[data-link]").forEach((button) => action(button, () => window.astral.openLink(button.dataset.link)));
 
 (async () => {
-  try { local = await window.astral.status(); render(); await check(); }
+  try {
+    local = await window.astral.status();
+    current = Math.max(0, CARDS.findIndex((card) => card.dataset.launcher === local.launcher));
+    place();
+    describe(false);
+    render();
+    await check();
+  }
   catch (error) { notice(error.message, true); }
 })();

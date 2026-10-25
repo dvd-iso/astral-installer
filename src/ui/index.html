@@ -20,40 +20,50 @@
     <section id="homeScreen" class="screen home-screen" aria-labelledby="homeTitle">
       <div class="intro home-intro">
         <p class="eyebrow"><span class="tiny-star" aria-hidden="true">✦</span> SEU PRÓXIMO CAPÍTULO</p>
-        <h1 id="homeTitle">Seu mundo começa<br>com uma <span>escolha.</span></h1>
-        <p class="lead">Qual launcher você usa para jogar?</p>
+        <h1 id="homeTitle">Seu mundo começa com uma <span>escolha.</span></h1>
       </div>
-      <div class="launcher-grid" id="launcherGrid" role="group" aria-label="Escolha seu launcher">
-        <button class="launcher-card card-official" data-launcher="official" type="button" aria-controls="installScreen">
-          <span class="card-topline"><span class="card-number">01 / OFICIAL</span><span class="card-arrow" aria-hidden="true">↗</span></span>
-          <span class="card-art"><span class="icon-orbit" aria-hidden="true"></span><img src="../../assets/launchers/minecraft.svg" width="88" height="88" alt=""></span>
-          <span class="launcher-card-name">Minecraft Launcher</span>
-          <span class="launcher-card-description">O launcher oficial do Minecraft</span>
-          <span class="launcher-card-action">Preparar meu Astral <span aria-hidden="true">→</span></span>
-        </button>
-        <button class="launcher-card card-sklauncher" data-launcher="sklauncher" type="button" aria-controls="installScreen">
-          <span class="card-topline"><span class="card-number">02 / SKLAUNCHER</span><span class="card-arrow" aria-hidden="true">↗</span></span>
-          <span class="card-art"><span class="icon-orbit" aria-hidden="true"></span><img src="../../assets/launchers/sklauncher.svg" width="76" height="76" alt=""></span>
-          <span class="launcher-card-name">SKlauncher</span>
-          <span class="launcher-card-description">Uma instância pronta na sua biblioteca</span>
-          <span class="launcher-card-action">Preparar meu Astral <span aria-hidden="true">→</span></span>
-        </button>
-        <button class="launcher-card card-prism" data-launcher="prism" type="button" aria-controls="installScreen">
-          <span class="card-topline"><span class="card-number">03 / PRISM</span><span class="card-arrow" aria-hidden="true">↗</span></span>
-          <span class="card-art"><span class="icon-orbit" aria-hidden="true"></span><img src="../../assets/launchers/prism.svg" width="88" height="88" alt=""></span>
-          <span class="launcher-card-name">Prism Launcher</span>
-          <span class="launcher-card-description">Seu pack, do seu jeito de jogar</span>
-          <span class="launcher-card-action">Preparar meu Astral <span aria-hidden="true">→</span></span>
-        </button>
-        <button class="launcher-card card-modrinth" data-launcher="modrinth" type="button" aria-controls="installScreen">
-          <span class="card-topline"><span class="card-number">04 / MODRINTH</span><span class="card-arrow" aria-hidden="true">↗</span></span>
-          <span class="card-art"><span class="icon-orbit" aria-hidden="true"></span><img src="../../assets/launchers/modrinth.svg" width="84" height="84" alt=""></span>
-          <span class="launcher-card-name">Modrinth App</span>
-          <span class="launcher-card-description">O pack verificado, importado pelo app</span>
-          <span class="launcher-card-action">Preparar meu Astral <span aria-hidden="true">→</span></span>
-        </button>
+      <div class="selector" id="selector" role="group" aria-roledescription="seletor" aria-label="Escolha seu launcher">
+        <span class="selector-corner" aria-hidden="true"></span><span class="selector-corner" aria-hidden="true"></span><span class="selector-corner" aria-hidden="true"></span><span class="selector-corner" aria-hidden="true"></span>
+        <div class="selector-scan" aria-hidden="true"></div>
+        <div class="selector-motes" id="selectorMotes" aria-hidden="true"></div>
+        <button class="selector-arrow prev" id="prevLauncher" type="button" aria-label="Launcher anterior"><span aria-hidden="true">‹</span></button>
+        <div class="selector-stage" id="launcherGrid">
+          <div class="stage-floor" aria-hidden="true"></div>
+          <button class="launcher-card card-official" data-launcher="official" type="button" aria-controls="installScreen">
+            <span class="card-topline"><span class="card-number">01 / OFICIAL</span><span class="card-arrow" aria-hidden="true">↗</span></span>
+            <span class="card-art"><span class="icon-orbit" aria-hidden="true"></span><img src="../../assets/launchers/minecraft.svg" width="88" height="88" alt=""></span>
+            <span class="launcher-card-name">Minecraft Launcher</span>
+          </button>
+          <button class="launcher-card card-sklauncher" data-launcher="sklauncher" type="button" aria-controls="installScreen">
+            <span class="card-topline"><span class="card-number">02 / SKLAUNCHER</span><span class="card-arrow" aria-hidden="true">↗</span></span>
+            <span class="card-art"><span class="icon-orbit" aria-hidden="true"></span><img src="../../assets/launchers/sklauncher.svg" width="76" height="76" alt=""></span>
+            <span class="launcher-card-name">SKlauncher</span>
+          </button>
+          <button class="launcher-card card-prism" data-launcher="prism" type="button" aria-controls="installScreen">
+            <span class="card-topline"><span class="card-number">03 / PRISM</span><span class="card-arrow" aria-hidden="true">↗</span></span>
+            <span class="card-art"><span class="icon-orbit" aria-hidden="true"></span><img src="../../assets/launchers/prism.svg" width="88" height="88" alt=""></span>
+            <span class="launcher-card-name">Prism Launcher</span>
+          </button>
+          <button class="launcher-card card-modrinth" data-launcher="modrinth" type="button" aria-controls="installScreen">
+            <span class="card-topline"><span class="card-number">04 / MODRINTH</span><span class="card-arrow" aria-hidden="true">↗</span></span>
+            <span class="card-art"><span class="icon-orbit" aria-hidden="true"></span><img src="../../assets/launchers/modrinth.svg" width="84" height="84" alt=""></span>
+            <span class="launcher-card-name">Modrinth App</span>
+          </button>
+        </div>
+        <button class="selector-arrow next" id="nextLauncher" type="button" aria-label="Próximo launcher"><span aria-hidden="true">›</span></button>
+        <div class="selector-info">
+          <div class="selector-text" aria-live="polite">
+            <p class="selector-count"><span id="selectorIndex">01</span> / 04 <span id="selectorTag" class="selector-tag" hidden>ÚLTIMO USADO</span></p>
+            <h2 id="selectorName">Minecraft Launcher</h2>
+            <p id="selectorDescription" class="selector-description">O launcher oficial do Minecraft</p>
+          </div>
+          <div class="selector-actions">
+            <div class="selector-pips" id="selectorPips" role="group" aria-label="Ir para o launcher"></div>
+            <button id="selectorGo" class="primary selector-go" type="button"><span id="selectorAction">Preparar meu Astral</span><span aria-hidden="true">→</span></button>
+          </div>
+        </div>
       </div>
-      <p class="home-note"><span class="status-dot" aria-hidden="true"></span> Instale, atualize e volte para a aventura.</p>
+      <p class="home-note"><span class="status-dot" aria-hidden="true"></span> Role o mouse ou use <kbd>←</kbd> <kbd>→</kbd> para trocar · <kbd>Enter</kbd> para escolher</p>
       <p id="homeNotice" class="notice error" role="status" aria-live="polite" hidden></p>
     </section>
 

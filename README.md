@@ -36,7 +36,7 @@ Para atualizar, reabra o instalador, **selecione o mesmo launcher**, clique em *
 
 O aplicativo lembra a última escolha e a pasta de cada launcher. Instalar no Prism não modifica uma instalação do SKlauncher ou do launcher oficial. Quem usa a versão 1.0 pode atualizar o aplicativo: a instalação oficial existente continua no mesmo local.
 
-A tela inicial mostra um cartão para cada launcher; **← Escolher outro launcher** (ou Esc) volta para a escolha. Os efeitos sonoros são sintetizados no próprio aplicativo e podem ser desligados em **Som ligado**; **Animações** pausa o movimento, que também fica desativado quando o sistema pede movimento reduzido.
+A tela inicial é um seletor no estilo de biblioteca de jogos: role o mouse, use as setas do teclado, arraste ou clique nos cartões laterais para trocar de launcher, e **Enter** ou **Preparar meu Astral** para escolher. **← Escolher outro launcher** (ou Esc) volta para a escolha. Os efeitos sonoros são sintetizados no próprio aplicativo e podem ser desligados em **Som ligado**; **Animações** pausa o movimento, que também fica desativado quando o sistema pede movimento reduzido.
 
 ### Pasta do modpack
 
