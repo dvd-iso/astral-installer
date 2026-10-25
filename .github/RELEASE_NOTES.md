@@ -2,6 +2,11 @@
 
 Escolha no aplicativo entre **Minecraft Launcher**, **SKlauncher 4** e **Prism Launcher**. Cada opção mantém sua própria instalação, estado de atualização e backups.
 
+### Novidades da versão 1.2.2
+
+- As instâncias se chamam **Astral** e usam o ícone do Astral no Minecraft Launcher, no SKlauncher 4 e no Prism Launcher. Instalações anteriores recebem o ícone na próxima atualização; nomes e ícones escolhidos por você no launcher são mantidos.
+- A interface usa a fonte Monocraft, a mesma do site do Astral.
+
 ### Novidades da versão 1.2.1
 
 - Nova tela inicial com três cartões grandes, um para cada launcher. Ao clicar, abre a instalação específica daquele launcher; **← Escolher outro launcher** (ou Esc) volta.
