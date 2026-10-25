@@ -79,7 +79,7 @@ function createWindow() {
   });
   window.loadURL(uiUrl);
   if (process.argv.includes("--smoke-test")) {
-    const timeout = setTimeout(() => app.exit(1), 20_000);
+    const timeout = setTimeout(() => app.exit(1), 40_000);
     window.webContents.once("did-finish-load", async () => {
       try {
         const valid = await window.webContents.executeJavaScript(`(async () => {
@@ -92,7 +92,7 @@ function createWindow() {
           const cards = document.querySelectorAll('.launcher-card');
           if (cards.length !== 3 || !window.AstralEffects || window.require) return false;
           cards[2].click();
-          for (let i = 0; i < 50 && document.getElementById('installScreen').hidden; i++) await new Promise((resolve) => setTimeout(resolve, 100));
+          for (let i = 0; i < 150 && document.getElementById('installScreen').hidden; i++) await new Promise((resolve) => setTimeout(resolve, 100));
           const opened = !document.getElementById('installScreen').hidden && document.getElementById('homeScreen').hidden && document.getElementById('launcherTitle').textContent === 'Prism Launcher';
           await window.astral.selectLauncher(initial.launcher);
           return opened && Boolean(document.querySelector('#install'));

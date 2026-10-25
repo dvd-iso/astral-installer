@@ -159,7 +159,11 @@
 
   async function animate(element, frames, options) {
     if (!motionEnabled() || !element.animate) return;
-    try { await element.animate(frames, options).finished; } catch { /* Pausar movimento também cancela transições em andamento. */ }
+    const animation = element.animate(frames, options);
+    // Janelas ocultas ou renderizadores lentos podem não avançar a animação; a navegação não deve depender dela.
+    const limit = new Promise((resolve) => setTimeout(resolve, (options.duration || 0) + (options.delay || 0) + 150));
+    try { await Promise.race([animation.finished, limit]); } catch { /* Pausar movimento também cancela transições em andamento. */ }
+    if (animation.playState !== "finished" && !(options.fill && options.fill !== "none")) animation.cancel();
   }
 
   window.AstralEffects = Object.freeze({ play, motionEnabled, animate });
