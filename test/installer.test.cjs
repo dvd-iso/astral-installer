@@ -452,3 +452,33 @@ test("dá nome e ícone do Astral às instalações e preserva as personalizaç�
   const text = await fs.readFile(config, "utf8");
   assert.deepEqual([iniValue(text, "name"), iniValue(text, "iconKey")], ["Meu pack", "fluxer-icon"]);
 });
+
+test("entrega ao Modrinth App o .mrpack verificado e substitui o arquivo nas atualizações", async (t) => {
+  const f = await fixture(t);
+  const deliveryDir = path.join(f.directory, "Downloads", "Astral");
+  const options = { ...f.options, launcher: "modrinth", launcherDir: path.join(f.directory, "ModrinthApp"), deliveryDir };
+  const first = f.publish("1.0.0");
+  let result = await install(options);
+  assert.equal(result.update, false);
+  assert.equal(result.packFile, path.join(deliveryDir, "Astral-1.0.0.mrpack"));
+  assert.deepEqual(await fs.readFile(result.packFile), first.archive);
+  assert.equal((await installedState(deliveryDir)).launcher, "modrinth");
+  // O Modrinth App instala os mods; nada é extraído nem registrado em outro launcher.
+  assert.deepEqual((await fs.readdir(deliveryDir)).sort(), [".astral", "Astral-1.0.0.mrpack"]);
+  assert(!await exists(options.launcherDir));
+
+  f.publish("1.1.0");
+  result = await install(options);
+  assert.equal(result.update, true);
+  assert.match(result.message, /Reinstalar modpack/);
+  assert.deepEqual((await fs.readdir(deliveryDir)).sort(), [".astral", "Astral-1.1.0.mrpack"]);
+  assert.equal((await installedState(deliveryDir)).version, "1.1.0");
+
+  const broken = f.publish("1.2.0");
+  f.routes.set("/pack-1.2.0.mrpack", Buffer.from(broken.archive).fill(0, 0, 4));
+  await assert.rejects(install(options), /integridade/);
+  assert.deepEqual((await fs.readdir(deliveryDir)).sort(), [".astral", "Astral-1.1.0.mrpack"]);
+  assert(processesAreBusy("modrinth app /usr/bin/Modrinth App", "/pack", "modrinth"));
+  assert.equal(launcherDirectories("modrinth", "win32", "home", { APPDATA: "appdata" })[0], path.join("appdata", "ModrinthApp"));
+  assert(launcherDirectories("modrinth", "linux", "/home/test", {}).some((directory) => directory.includes("com.modrinth.ModrinthApp")));
+});

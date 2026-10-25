@@ -1,6 +1,11 @@
 ## Instale e atualize o Astral no seu launcher
 
-Escolha no aplicativo entre **Minecraft Launcher**, **SKlauncher 4** e **Prism Launcher**. Cada opção mantém sua própria instalação, estado de atualização e backups.
+Escolha no aplicativo entre **Minecraft Launcher**, **SKlauncher 4**, **Prism Launcher** e **Modrinth App**. Cada opção mantém sua própria instalação, estado de atualização e backups.
+
+### Novidades da versão 1.3.0
+
+- **Modrinth App**: novo cartão na tela inicial. O instalador baixa e verifica o pack do Astral e o abre no Modrinth App, que cria a instância Astral. Para atualizar, o novo arquivo fica em **Downloads/Astral**; no Modrinth App, use **Configurações → Instalação → Reinstalar modpack** na instância Astral.
+- O cartão do launcher usado por último mostra **Voltar ao Astral**.
 
 ### Novidades da versão 1.2.2
 

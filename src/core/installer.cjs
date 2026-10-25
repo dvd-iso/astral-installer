@@ -35,8 +35,51 @@ async function installedState(gameDir) {
   return state;
 }
 
+// Entrega o .mrpack verificado para o launcher importar. Uma entrega anterior indica que a instância já existe nele.
+async function deliverPack(target, options) {
+  const { gameDir } = target;
+  const emit = (detail) => options.onProgress?.(detail);
+  return withInstallLock(gameDir, async () => {
+    const previous = await installedState(gameDir);
+    emit({ phase: "check", message: "Consultando a versão atual do Astral…", canCancel: true });
+    const channel = await getChannel(options);
+    const packFile = `Astral-${channel.version.replace(/[^a-zA-Z0-9._-]+/g, "-")}.mrpack`;
+    const file = await safeTarget(gameDir, packFile);
+    let downloaded = 0;
+    emit({ phase: "pack", message: `Baixando ${channel.name}…`, canCancel: true });
+    await downloadVerified([channel.pack.url], file, channel.pack, {
+      ...options,
+      onBytes(bytes) {
+        downloaded += bytes;
+        emit({ phase: "pack", message: `Baixando ${channel.name}…`, downloadedBytes: Math.min(downloaded, channel.pack.size), totalBytes: channel.pack.size, canCancel: true });
+      },
+    });
+    const pack = readPack(file, options);
+    if (pack.index.dependencies.minecraft !== channel.minecraftVersion || pack.index.dependencies["fabric-loader"] !== channel.fabricLoader) {
+      await fs.rm(file, { force: true });
+      throw new Error("O modpack baixado não corresponde às versões publicadas no canal.");
+    }
+    if (/^Astral-[\w.-]+\.mrpack$/.test(previous?.packFile) && previous.packFile !== packFile) await fs.rm(await safeTarget(gameDir, previous.packFile), { force: true });
+    const state = {
+      schemaVersion: 1, id: "astral", launcher: target.id, version: channel.version, name: channel.name,
+      packSha512: channel.pack.sha512, minecraftVersion: channel.minecraftVersion, fabricLoader: channel.fabricLoader,
+      installedAt: previous?.installedAt || new Date().toISOString(), updatedAt: new Date().toISOString(),
+      files: {}, preserved: [], packFile,
+    };
+    await atomicWrite(await safeTarget(gameDir, ".astral/state.json"), jsonBytes(state));
+    const update = Boolean(previous);
+    const message = previous?.packSha512 === channel.pack.sha512
+      ? `${packFile} está verificado na pasta do Astral. Para reinstalar, use Configurações → Instalação → Reinstalar modpack na instância Astral do Modrinth App; se ela não existir mais, arraste o arquivo para o app.`
+      : update ? `Novo pack pronto: ${packFile}, na pasta do Astral. No Modrinth App, abra a instância Astral, vá em Configurações → Instalação → Reinstalar modpack e escolha esse arquivo.`
+      : "O Modrinth App vai abrir o Astral. Confirme a instalação nele; o aviso de modpack fora do Modrinth é esperado.";
+    emit({ phase: "done", message, canCancel: false });
+    return { state, backupDir: null, gameDir, preserved: [], launcher: target.id, message, packFile: file, update, channel };
+  });
+}
+
 async function install(options) {
-  const target = await installationTarget(options.launcher || "official", options.launcherDir || options.minecraftDir, { validate: true });
+  const target = await installationTarget(options.launcher || "official", options.launcherDir || options.minecraftDir, { validate: true, deliveryDir: options.deliveryDir });
+  if (target.delivery) return deliverPack(target, options);
   await verifyOwnership(target);
   const { gameDir, roots } = target;
   const emit = (detail) => options.onProgress?.(detail);
@@ -131,4 +174,4 @@ async function install(options) {
   });
 }
 
-module.exports = { getChannel, installedState, install, compareVersions };
+module.exports = { getChannel, installedState, install, deliverPack, compareVersions };

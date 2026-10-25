@@ -1,6 +1,7 @@
 # Astral Installer
 
-- Aplicativo auxiliar do Minecraft Launcher oficial, SKlauncher 4 e Prism Launcher. Login, Java e inicialização do jogo pertencem ao launcher escolhido.
+- Aplicativo auxiliar do Minecraft Launcher oficial, SKlauncher 4, Prism Launcher e Modrinth App. Login, Java e inicialização do jogo pertencem ao launcher escolhido.
+- No Modrinth App, não escreva no banco interno (`app.db`): o schema muda a cada versão. O instalador só entrega o `.mrpack` verificado em `Downloads/Astral` e o abre no app; atualizações usam **Reinstalar modpack** na instância.
 - `src/core/` deve funcionar em Node sem Electron; as verificações usam `node --test` e servidores HTTP locais.
 - No launcher oficial, use a pasta exclusiva `astral/`. No SKlauncher e no Prism, use a instância própria `astral-installer`. Nunca use uma pasta compartilhada de jogo como diretório do modpack.
 - Atualizações só removem arquivos registrados pelo instalador. Preserve mundos, capturas, arquivos pessoais e configurações alteradas; mantenha backup e recuperação de transações interrompidas.

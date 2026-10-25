@@ -16,6 +16,11 @@ const LAUNCHER_UI = {
     subtitle: "Uma instância Astral pronta na lista do Prism.",
     help: "Abra o Prism pelo menos uma vez e configure sua conta nele. A instância Astral aparece na lista; o Prism prepara Minecraft e Java ao jogar. Para instalações portáteis, use Localizar launcher e escolha a pasta com prismlauncher.cfg (Pastas → Pasta do launcher).",
   },
+  modrinth: {
+    icon: "../../assets/launchers/modrinth.svg",
+    subtitle: "O pack verificado, importado pelo próprio Modrinth App.",
+    help: "Instale o Modrinth App e entre com sua conta nele. Na primeira instalação, o Modrinth App abre a importação do Astral: confirme mesmo com o aviso de modpack fora do Modrinth. Para atualizar, o novo arquivo fica na pasta mostrada abaixo; no Modrinth App, abra Astral → Configurações → Instalação → Reinstalar modpack e escolha esse arquivo. Se o app não abrir sozinho, arraste o arquivo para a janela dele.",
+  },
 };
 const STAGES = { recovery: 0, check: 0, pack: 0, mods: 0, runtime: 1, commit: 1, done: 2 };
 let local;
@@ -50,6 +55,7 @@ function render() {
   document.querySelectorAll(".launcher-card").forEach((card) => {
     card.disabled = busy || selecting;
     card.classList.toggle("last-used", card.dataset.launcher === local.launcher);
+    card.querySelector(".launcher-card-action").firstChild.textContent = card.dataset.launcher === local.launcher && local.installed ? "Voltar ao Astral " : "Preparar meu Astral ";
     card.classList.toggle("loading", selecting && card.dataset.launcher === selecting);
   });
   $("back").disabled = busy || selecting;
@@ -58,17 +64,22 @@ function render() {
   $("launcherTitle").textContent = local.launcherName;
   $("launcherSubtitle").textContent = ui.subtitle;
   $("launcherHelp").textContent = ui.help;
+  const delivery = local.launcher === "modrinth";
   $("gameDir").textContent = local.gameDir;
   $("gameDir").title = `Launcher: ${local.launcherDir}`;
   $("locationTitle").textContent = `Astral no ${local.launcherName}`;
   $("launchLabel").textContent = `Abrir ${local.launcherName}`;
   $("downloadLauncher").textContent = `Baixar ${local.launcherName}`;
-  $("launcherHint").textContent = `Feche o jogo e o ${local.launcherName} antes de instalar ou atualizar. Depois, selecione Astral no launcher.`;
-  $("installedVersion").textContent = local.installed ? `Instalado: ${local.installed.name} · versão ${local.installed.version}` : "Pronto para sua primeira instalação.";
+  $("launcherHint").textContent = delivery ? "Na primeira vez, o Modrinth App abre a importação do Astral. Nas atualizações, use Reinstalar modpack na instância Astral."
+    : `Feche o jogo e o ${local.launcherName} antes de instalar ou atualizar. Depois, selecione Astral no launcher.`;
+  $("locationNote").textContent = delivery ? "O .mrpack verificado fica aqui para o Modrinth App." : "Seus mundos e preferências ficam preservados.";
+  $("openGame").textContent = delivery ? "Pasta do pack" : "Modpack e backups";
+  $("choose").hidden = delivery;
+  $("installedVersion").textContent = local.installed ? `${delivery ? "Enviado ao Modrinth App" : "Instalado"}: ${local.installed.name} · versão ${local.installed.version}` : "Pronto para sua primeira instalação.";
   const available = channel && local.installed?.packSha512 !== channel.pack.sha512;
   $("install").disabled = busy || selecting || !channel;
   $("install").classList.toggle("pulse", Boolean(channel && !busy && (!local.installed || available)));
-  $("installLabel").textContent = busy ? "Preparando seu mundo…" : !channel ? "Aguardando conexão…" : !local.installed ? "Instalar Astral" : available ? "Atualizar modpack" : "Verificar e reparar";
+  $("installLabel").textContent = busy ? "Preparando seu mundo…" : !channel ? "Aguardando conexão…" : !local.installed ? "Instalar Astral" : available ? "Atualizar modpack" : delivery ? "Baixar o pack de novo" : "Verificar e reparar";
   $("installArrow").textContent = local.installed && !available ? "↻" : "↓";
   $("check").disabled = busy || selecting || checking;
   $("check").textContent = checking ? "Consultando…" : "Buscar atualizações";

@@ -18,6 +18,8 @@ let lastProgressAt = 0;
 let lastPhase;
 const uiUrl = pathToFileURL(path.join(__dirname, "ui", "index.html")).href;
 
+function deliveryDir() { return path.join(app.getPath("downloads"), "Astral"); }
+
 function log(message) { return appendLog(path.join(app.getPath("userData"), "installer.log"), message).catch(console.error); }
 
 async function status() {
@@ -25,7 +27,7 @@ async function status() {
   launcher ||= Object.hasOwn(LAUNCHERS, preferences.launcher) ? preferences.launcher : "official";
   const directories = preferences.directories || {};
   const directory = directories[launcher] || (launcher === "official" && preferences.minecraftDir) || await detectLauncherDirectory(launcher);
-  const target = await installationTarget(launcher, directory);
+  const target = await installationTarget(launcher, directory, { deliveryDir: deliveryDir() });
   return { appVersion: app.getVersion(), platform: process.platform, arch: process.arch,
     launcher, launcherName: target.name, launchers: Object.values(LAUNCHERS), launcherDir: target.launcherDir, gameDir: target.gameDir,
     installed: await installedState(target.gameDir), busy: Boolean(controller) || changingLauncher };
@@ -48,6 +50,17 @@ function register(channel, callback) {
       return { ok: false, error: error.name === "AbortError" ? "Operação cancelada. A instalação anterior foi preservada." : error.message };
     }
   });
+}
+
+// Primeira entrega: o Modrinth App importa o pack. Nas atualizações, o jogador reinstala o pack na instância que já existe.
+async function handOff(result) {
+  if (result.update) { shell.showItemInFolder(result.packFile); return result.message; }
+  try { await openLauncher({ id: result.launcher }, result.packFile); return result.message; }
+  catch (error) { await log(`Modrinth App: ${error.message}`); }
+  // No Linux, sem a associação do .mrpack, o arquivo abriria no gerenciador de arquivos compactados.
+  if (process.platform !== "linux" && !await shell.openPath(result.packFile)) return result.message;
+  shell.showItemInFolder(result.packFile);
+  return `Não foi possível abrir o Modrinth App automaticamente. Abra-o e arraste ${path.basename(result.packFile)}, da pasta que acabou de abrir, para a janela dele.`;
 }
 
 function progress(detail) {
@@ -84,13 +97,13 @@ function createWindow() {
       try {
         const valid = await window.webContents.executeJavaScript(`(async () => {
           const initial = await window.astral.status();
-          for (const launcher of ['official', 'sklauncher', 'prism']) {
+          for (const launcher of ['official', 'sklauncher', 'prism', 'modrinth']) {
             const state = await window.astral.selectLauncher(launcher);
             if (state.launcher !== launcher || !state.gameDir || state.busy) return false;
           }
           await window.astral.selectLauncher(initial.launcher);
           const cards = document.querySelectorAll('.launcher-card');
-          if (cards.length !== 3 || !window.AstralEffects || window.require) return false;
+          if (cards.length !== 4 || !window.AstralEffects || window.require) return false;
           cards[2].click();
           for (let i = 0; i < 150 && document.getElementById('installScreen').hidden; i++) await new Promise((resolve) => setTimeout(resolve, 100));
           const opened = !document.getElementById('installScreen').hidden && document.getElementById('homeScreen').hidden && document.getElementById('launcherTitle').textContent === 'Prism Launcher';
@@ -147,10 +160,11 @@ else {
       canCancel = true;
       try {
         const current = await status();
-        const result = await install({ launcher: current.launcher, launcherDir: current.launcherDir, signal: controller.signal,
+        const result = await install({ launcher: current.launcher, launcherDir: current.launcherDir, deliveryDir: deliveryDir(), signal: controller.signal,
           onProgress: progress, ensureIdle: () => ensureIdle(current.gameDir, current.launcher) });
         await log(`Instalado ${result.state.name} (${result.state.version}); ${result.preserved.length} preferências preservadas.`);
-        return { ...await status(), busy: false, backupDir: result.backupDir, preserved: result.preserved, message: result.message, channel: result.channel };
+        const message = result.packFile ? await handOff(result) : result.message;
+        return { ...await status(), busy: false, backupDir: result.backupDir, preserved: result.preserved, message, channel: result.channel };
       } finally {
         controller = null;
         canCancel = false;

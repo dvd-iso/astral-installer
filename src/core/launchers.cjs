@@ -9,10 +9,11 @@ const LAUNCHERS = Object.freeze({
   official: { id: "official", name: "Minecraft Launcher", url: "https://www.minecraft.net/download", marker: "launcher_profiles.json" },
   sklauncher: { id: "sklauncher", name: "SKlauncher", url: "https://next.skmedix.pl/downloads", marker: "instances.json" },
   prism: { id: "prism", name: "Prism Launcher", url: "https://prismlauncher.org/download/", marker: "prismlauncher.cfg" },
+  modrinth: { id: "modrinth", name: "Modrinth App", url: "https://modrinth.com/app", marker: "app.db" },
 });
 
 function launcherInfo(id) {
-  if (!Object.hasOwn(LAUNCHERS, id)) throw new Error("Escolha Minecraft Launcher, SKlauncher ou Prism Launcher.");
+  if (!Object.hasOwn(LAUNCHERS, id)) throw new Error("Escolha Minecraft Launcher, SKlauncher, Prism Launcher ou Modrinth App.");
   return LAUNCHERS[id];
 }
 
@@ -23,6 +24,12 @@ function launcherDirectories(id, platform = process.platform, home = os.homedir(
   if (id === "sklauncher") {
     return [platform === "darwin" ? path.join(home, "Library", "Application Support", "sklauncher")
       : platform === "win32" ? path.join(appData, ".sklauncher") : path.join(home, ".sklauncher")];
+  }
+  if (id === "modrinth") {
+    if (platform === "win32") return [path.join(appData, "ModrinthApp")];
+    if (platform === "darwin") return [path.join(home, "Library", "Application Support", "ModrinthApp")];
+    return [path.join(env.XDG_DATA_HOME || path.join(home, ".local", "share"), "ModrinthApp"),
+      path.join(home, ".var", "app", "com.modrinth.ModrinthApp", "data", "ModrinthApp")];
   }
   if (platform === "win32") return [path.join(appData, "PrismLauncher"), path.join(home, "scoop", "persist", "prismlauncher")];
   if (platform === "darwin") return [path.join(home, "Library", "Application Support", "PrismLauncher")];
@@ -92,9 +99,16 @@ async function sklauncherStore(directory) {
   return store;
 }
 
-async function installationTarget(id, directory, { validate = false } = {}) {
+function defaultDeliveryDir(home = os.homedir()) { return path.join(home, "Downloads", "Astral"); }
+
+async function installationTarget(id, directory, { validate = false, deliveryDir } = {}) {
   const info = launcherInfo(id);
   let launcherDir = path.resolve(directory);
+  // O banco de instâncias do Modrinth App é interno e muda a cada versão do app; ele mesmo importa o .mrpack verificado.
+  if (id === "modrinth") {
+    const gameDir = path.resolve(deliveryDir || defaultDeliveryDir());
+    return { id, name: info.name, launcherDir, gameDir, delivery: true, roots: { game: gameDir } };
+  }
   if (await exists(launcherDir)) launcherDir = await fs.realpath(launcherDir);
   else if (validate) throw new Error(`A pasta do ${info.name} não existe. Abra o launcher ou use Localizar launcher.`);
   if (id === "official") {
@@ -129,7 +143,7 @@ async function installationTarget(id, directory, { validate = false } = {}) {
 }
 
 async function verifyOwnership(target) {
-  if (target.id === "official") return;
+  if (target.id === "official" || target.delivery) return;
   const state = await safeTarget(target.gameDir, ".astral/state.json");
   const journal = await safeTarget(target.gameDir, ".astral/transaction.json");
   if (await exists(state) || await exists(journal)) return;
@@ -201,5 +215,5 @@ function completionMessage(target, runtimeChanged = false) {
   return target.id === "sklauncher" && runtimeChanged ? `${base} Use Instalar no SKlauncher para preparar o Minecraft e o Java desta instância.` : base;
 }
 
-module.exports = { INSTANCE_ID, LAUNCHERS, launcherInfo, launcherDirectories, detectLauncherDirectory, iniValue, updateIni,
+module.exports = { INSTANCE_ID, LAUNCHERS, launcherInfo, launcherDirectories, detectLauncherDirectory, defaultDeliveryDir, iniValue, updateIni,
   sklauncherStore, installationTarget, verifyOwnership, prepareLauncherRuntime, registrationOperations, completionMessage };

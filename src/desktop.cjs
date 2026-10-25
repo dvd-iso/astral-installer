@@ -12,6 +12,7 @@ function processesAreBusy(processes, gameDir, launcher = "official") {
     official: /minecraftlauncher(?:\.exe)?|minecraft-launcher(?:\s|$)|minecraft\.exe|minecraft\.app\/contents\/macos\//,
     sklauncher: /\bsklauncher(?:\.exe|\.app|[ /]|$)/,
     prism: /\bprismlauncher(?:\.exe|\.app|[ /]|$)|prism launcher/,
+    modrinth: /modrinth app|\bmodrinthapp\b|\bmodrinth-app\b/,
   }[launcher];
   return processes.split("\n").some((line) => {
     const text = line.toLowerCase();
@@ -41,7 +42,8 @@ function launch(command, args = []) {
   });
 }
 
-async function openLauncher(target = { id: "official" }) {
+async function openLauncher(target = { id: "official" }, file) {
+  if (target.id === "modrinth") return openModrinth(file);
   if (target.id !== "official") return openInstanceLauncher(target);
   if (process.platform === "darwin") return launch("open", ["-a", "Minecraft"]);
   if (process.platform === "win32") {
@@ -89,6 +91,28 @@ async function openInstanceLauncher(target) {
     }
   }
   throw new Error(`Abra o ${info.name} pelo seu atalho e selecione a instância Astral. Não foi possível localizar o executável automaticamente.`);
+}
+
+// Com um .mrpack como argumento, o Modrinth App (ou a instância já aberta dele) mostra a importação do pack.
+async function openModrinth(file) {
+  const args = file ? [file] : [];
+  if (process.platform === "darwin") return launch("open", ["-a", "Modrinth App", ...args]);
+  if (process.platform === "win32") {
+    for (const root of [process.env.LOCALAPPDATA, process.env.ProgramFiles, process.env["ProgramFiles(x86)"]].filter(Boolean)) {
+      const executable = path.join(root, "Modrinth App", "Modrinth App.exe");
+      if (await exists(executable)) return launch(executable, args);
+    }
+  } else {
+    for (const command of ["modrinth-app", "ModrinthApp"]) {
+      try { return await launch(command, args); }
+      catch (error) { if (error.code !== "ENOENT") throw error; }
+    }
+    try {
+      await run("flatpak", ["info", "com.modrinth.ModrinthApp"], { timeout: 10_000 });
+      return await launch("flatpak", ["run", ...(file ? ["--file-forwarding", "com.modrinth.ModrinthApp", "@@", file, "@@"] : ["com.modrinth.ModrinthApp"])]);
+    } catch { /* AppImages e instalações manuais abrem pelo atalho do jogador. */ }
+  }
+  throw new Error("Não foi possível localizar o Modrinth App. Abra-o pelo seu atalho.");
 }
 
 async function appendLog(file, message) {
