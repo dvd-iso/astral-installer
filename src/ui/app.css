@@ -1,4 +1,6 @@
-:root { color-scheme: dark; font-family: "Segoe UI", Inter, -apple-system, BlinkMacSystemFont, sans-serif; color: #f0edf8; background: #090912; font-size: 14px; }
+@font-face { font-family: "Monocraft"; src: url("../../assets/fonts/Monocraft.woff2") format("woff2"); font-weight: 400; font-style: normal; }
+@font-face { font-family: "Monocraft"; src: url("../../assets/fonts/Monocraft-Bold.woff2") format("woff2"); font-weight: 700; font-style: normal; }
+:root { color-scheme: dark; font-family: "Monocraft", ui-monospace, monospace; color: #f0edf8; background: #090912; font-size: 14px; }
 * { box-sizing: border-box; }
 [hidden] { display: none !important; }
 body { margin: 0; min-height: 100vh; background: radial-gradient(ellipse at 78% 4%, #30204b66, transparent 56%); overflow-x: hidden; }
@@ -41,7 +43,7 @@ main { padding: 26px 32px 0; }
 .eyebrow { font-size: 10px; letter-spacing: .15em; color: #c2a5f8; font-weight: 600; margin: 0 0 14px; }
 .tiny-star { display: inline-block; color: #f2ce75; animation: spin 8s linear infinite; }
 @keyframes spin { to { transform: rotate(360deg); } }
-h1 { font-weight: 650; font-size: clamp(32px, 4.5vw, 44px); letter-spacing: -.035em; line-height: 1.15; margin: 0 0 13px; }
+h1 { font-weight: 650; font-size: clamp(32px, 4.5vw, 44px); letter-spacing: 0; line-height: 1.15; margin: 0 0 13px; }
 h1 span { color: #f2ce75; background: linear-gradient(90deg, #f2ce75, #ffe7ad, #f2ce75); background-size: 200% 100%; -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; animation: shimmer 4s ease-in-out infinite; }
 @keyframes shimmer { 50% { background-position: 100% 0; } }
 .lead { color: #b2a9c4; margin: 0; font-size: 15px; }
@@ -80,7 +82,7 @@ h1 span { color: #f2ce75; background: linear-gradient(90deg, #f2ce75, #ffe7ad, #
 .icon-orbit::after { content: ""; position: absolute; top: -3px; left: calc(50% - 3px); width: 6px; height: 6px; border-radius: 50%; background: var(--accent); box-shadow: 0 0 10px var(--accent); }
 .launcher-card:hover:not(:disabled) .icon-orbit { animation-duration: 5s; }
 @keyframes bob { to { transform: translateY(-8px); } }
-.launcher-card-name { font-size: 17px; font-weight: 650; letter-spacing: -.01em; color: #f4eefc; transform: translateZ(20px); }
+.launcher-card-name { font-size: 17px; font-weight: 650; letter-spacing: 0; color: #f4eefc; transform: translateZ(20px); }
 .launcher-card-description { font-size: 11px; color: #a99abf; margin-top: 5px; line-height: 1.4; }
 .launcher-card-action { margin-top: 12px; font-size: 11px; font-weight: 600; color: var(--accent); }
 .launcher-card-action span { display: inline-block; transition: transform .25s; }
@@ -110,7 +112,7 @@ h1 span { color: #f2ce75; background: linear-gradient(90deg, #f2ce75, #ffe7ad, #
 @keyframes glow { 50% { box-shadow: 0 0 14px #f2ce7533; } }
 .pack-heading { display: flex; justify-content: space-between; align-items: flex-start; gap: 16px; }
 .pack-emblem { font-size: 34px; color: #f2ce75; line-height: 1; margin-top: 14px; text-shadow: 0 0 22px #f2ce7577; animation: spin 14s linear infinite; }
-h2 { margin: 16px 0 12px; font-size: 25px; letter-spacing: -.025em; }
+h2 { margin: 16px 0 12px; font-size: 25px; letter-spacing: 0; }
 .pack-heading h2 { margin-bottom: 4px; }
 .versions { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 14px; }
 .versions span { padding: 5px 8px; font-size: 11px; color: #c1b8d4; background: #ffffff06; border: 1px solid #ffffff09; }
@@ -176,7 +178,7 @@ progress:indeterminate { background: linear-gradient(90deg, #ffffff0a 0%, #b391e
 .folder-icon svg { width: 17px; height: 17px; fill: none; stroke: currentColor; stroke-width: 1.6; stroke-linejoin: round; }
 .location h2 { font-size: 13px; font-weight: 600; letter-spacing: 0; margin: 0 0 7px; }
 .location .muted { font-size: 10px; margin: 7px 0 0; }
-.path { overflow-wrap: anywhere; font: 11px ui-monospace, monospace; color: #ad9cc9; margin: 0; user-select: text; }
+.path { overflow-wrap: anywhere; font-size: 11px; color: #ad9cc9; margin: 0; user-select: text; }
 .text-button, .help-links button, footer button { color: #c1a4e6; padding: 0; background: none; border: 0; font-size: 11px; }
 .text-button:hover:not(:disabled), .help-links button:hover:not(:disabled), footer button:hover { color: #e3caff; text-decoration: underline; }
 .help { color: #a89bb9; font-size: 11px; padding-top: 16px; }
