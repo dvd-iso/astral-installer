@@ -1,16 +1,16 @@
 {
   "schemaVersion": 1,
   "id": "astral",
-  "name": "Astral 2.0",
-  "version": "1.0.0",
+  "name": "Astral",
+  "version": "2.1",
   "minecraftVersion": "26.3",
   "fabricLoader": "0.19.5",
   "minimumInstallerVersion": "1.0.0",
-  "publishedAt": "2026-10-25T04:20:06.393Z",
-  "releaseNotes": "Primeira distribuição pelo Astral Installer, com suporte ao Minecraft Launcher oficial.",
+  "publishedAt": "2026-10-25T07:01:05.059Z",
+  "releaseNotes": "",
   "pack": {
-    "url": "https://astralmc.online/downloads/Astral.mrpack?sha512=e9090d8ff695cc3a",
-    "size": 11222017,
-    "sha512": "e9090d8ff695cc3a844c4d91877a9fd1131b789c14ef9e04a288c204aceeb8f5de8e003af80c1048de781ba79c461e7564189dc6b5bb266159f00e403f8e556e"
+    "url": "https://github.com/dvd-iso/astral-installer/releases/download/modpack-20261025-0356/Astral-2.1.mrpack?sha512=becb9f5dc10d67bc",
+    "size": 11199478,
+    "sha512": "becb9f5dc10d67bc43dd5fbcae6cb8d62ddd59001c8d6be240ab23161ef57ba84f9dcd692195f437252eb07d935269c1664b58022c9c392e8565d6613ebdb410"
   }
 }
