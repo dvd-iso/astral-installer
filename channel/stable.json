@@ -1,21 +1,21 @@
 {
   "schemaVersion": 1,
   "id": "astral",
-  "name": "Astral",
-  "version": "2.3",
+  "name": "Astral-2.4",
+  "version": "2.4",
   "minecraftVersion": "26.3",
   "fabricLoader": "0.19.5",
   "minimumInstallerVersion": "1.0.0",
-  "publishedAt": "2026-10-26T16:02:32.343Z",
-  "releaseNotes": "Inclui a identificação da versão do modpack para a verificação de entrada no servidor Astral. Quem estiver com uma versão antiga receberá uma mensagem orientando a atualizar pelo Astral Installer e reiniciar o Minecraft. Mantém o conteúdo do Astral 2.2, incluindo cutscenes e ferramentas nas costas.",
+  "publishedAt": "2026-10-26T16:33:06.770Z",
+  "releaseNotes": "Finalmente podemos anunciar nossa primeira versão estavel :)",
   "pack": {
-    "url": "https://github.com/dvd-iso/astral-installer/releases/download/modpack-20261026-1558/Astral-2.3.mrpack?sha512=faf812359077a64c",
-    "size": 196494745,
-    "sha512": "faf812359077a64c98d9dd0c8ec1cad77954f458f61fa0d13bc30e22b91b54e42285b036f7764da1cd6c12f85ab3d61914811ce07aef7dbc9f4a89d314a7054a"
+    "url": "https://github.com/dvd-iso/astral-installer/releases/download/modpack-20261026-1322/Astral-2.4.mrpack?sha512=5f2befeea08be1d8",
+    "size": 199432462,
+    "sha512": "5f2befeea08be1d8eccd7b944a4a9e302aac1fae9c1439333f48e484f1fbd9b2a488b8885b39d9c0b2e7c0644ec305addb469f3091a47b5baee2138df28eebb7"
   },
   "modpack": {
     "protocolVersion": 1,
-    "contentSha256": "8b8b6305e2d7c846e6f476dee50764ed8abba4ae1542a84b2b1883649ec99170",
-    "version": "2.3"
+    "contentSha256": "6a3a2bbd7708878c2b5d23e01f6a79c90ded2d5c6db138c774138782960d434b",
+    "version": "2.4"
   }
 }
