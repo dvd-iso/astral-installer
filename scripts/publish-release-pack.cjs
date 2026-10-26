@@ -6,6 +6,7 @@ const { createWriteStream } = require("node:fs");
 const { execFileSync } = require("node:child_process");
 const { Readable } = require("node:stream");
 const { pipeline } = require("node:stream/promises");
+const { setTimeout: delay } = require("node:timers/promises");
 const AdmZip = require("adm-zip");
 const { responseFor } = require("../src/core/network.cjs");
 const { readJson, atomicWrite, jsonBytes } = require("../src/core/files.cjs");
@@ -52,12 +53,28 @@ async function report(lines) {
   if (process.env.GITHUB_STEP_SUMMARY) await fs.appendFile(process.env.GITHUB_STEP_SUMMARY, `${lines.join("\n\n")}\n`);
 }
 
+// O evento de publicação é uma fotografia: o anexo pode chegar ou terminar o upload depois dele.
+async function waitForPack(loadRelease, { attempts = 40, wait = delay, onWaiting } = {}) {
+  for (let attempt = 0; attempt < attempts; attempt++) {
+    const release = await loadRelease();
+    const packs = (release.assets || []).filter((asset) => asset.name.toLowerCase().endsWith(".mrpack"));
+    if (packs.length > 1) throw new Error(`Anexe exatamente um arquivo .mrpack à release (encontrados: ${packs.length}).`);
+    if (packs.length === 1 && packs[0].state === "uploaded") return release;
+    if (attempt + 1 < attempts) {
+      onWaiting?.(release);
+      await wait(15_000);
+    }
+  }
+  throw new Error("O upload do .mrpack não terminou em até 10 minutos. Anexe o arquivo e reexecute Publicar modpack com a tag da release.");
+}
+
 async function currentRelease() {
   const event = await readJson(process.env.GITHUB_EVENT_PATH);
-  if (event.release) return event.release;
-  const tag = event.inputs?.tag;
+  const tag = event.release?.tag_name || event.inputs?.tag;
   if (!tag) throw new Error("Informe a tag da release de modpack.");
-  return JSON.parse(gh("api", `repos/${process.env.GITHUB_REPOSITORY}/releases/tags/${encodeURIComponent(tag)}`));
+  return waitForPack(() => JSON.parse(gh("api", `repos/${process.env.GITHUB_REPOSITORY}/releases/tags/${encodeURIComponent(tag)}`)), {
+    onWaiting() { console.log(`Aguardando o upload do .mrpack na release ${tag}…`); },
+  });
 }
 
 async function main() {
@@ -104,4 +121,4 @@ async function main() {
 
 if (require.main === module) main().catch((error) => { console.error(error.message); process.exitCode = 1; });
 
-module.exports = { cleanPack, isLocalData };
+module.exports = { cleanPack, isLocalData, waitForPack };

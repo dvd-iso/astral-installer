@@ -1,10 +1,10 @@
 name: Publicar modpack
 
-# Publicar uma release com um .mrpack anexado atualiza o canal do instalador.
+# Publicar uma release de modpack atualiza o canal, mesmo quando o anexo chega depois.
 # As releases do aplicativo (tags vX.Y.Z) não têm .mrpack e são ignoradas aqui.
 on:
   release:
-    types: [published]
+    types: [published, edited]
   # Reprocessa uma release já publicada, por exemplo depois de corrigir este workflow.
   workflow_dispatch:
     inputs:
@@ -22,7 +22,7 @@ concurrency:
 jobs:
   publicar:
     name: Publicar ${{ github.event.release.name || github.event.release.tag_name || inputs.tag }}
-    if: github.event_name == 'workflow_dispatch' || contains(join(github.event.release.assets.*.name, ' '), '.mrpack')
+    if: github.event_name == 'workflow_dispatch' || startsWith(github.event.release.tag_name, 'modpack-') || contains(join(github.event.release.assets.*.name, ' '), '.mrpack')
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
