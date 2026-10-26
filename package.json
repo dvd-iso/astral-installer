@@ -16,6 +16,7 @@
     "test": "node --test",
     "check": "node scripts/check.cjs",
     "verify:live": "node scripts/verify-live-pack.cjs",
+    "pack:prepare": "node scripts/prepare-pack.cjs",
     "pack:publish": "node scripts/publish-pack.cjs",
     "build": "electron-builder --publish never",
     "build:dir": "electron-builder --dir --publish never"

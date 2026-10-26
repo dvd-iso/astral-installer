@@ -21,6 +21,9 @@ function validateChannel(channel, options = {}) {
   if (!/^[a-f0-9]{128}$/.test(channel.pack?.sha512) || !Number.isSafeInteger(channel.pack.size)
     || channel.pack.size < 1 || channel.pack.size > 512 * 1024 * 1024) throw new Error("Metadados de integridade do modpack inválidos.");
   downloadUrl(channel.pack.url, options.allowHttp);
+  if (channel.modpack && (channel.modpack.protocolVersion !== 1 || !/^[a-f0-9]{64}$/.test(channel.modpack.contentSha256)
+    || typeof channel.modpack.version !== "string" || !channel.modpack.version.trim() || channel.modpack.version.length > 120
+    || /[\x00-\x1f\x7f-\x9f]/.test(channel.modpack.version))) throw new Error("Identificação do modpack inválida no canal.");
   if (channel.minimumInstallerVersion && !/^\d+\.\d+\.\d+$/.test(channel.minimumInstallerVersion)) {
     throw new Error("Versão mínima do instalador inválida.");
   }

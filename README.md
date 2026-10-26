@@ -34,6 +34,8 @@ Também há ZIPs para macOS e checksums SHA-256 em cada release. Os pacotes incl
 
 Para atualizar, reabra o instalador, **selecione o mesmo launcher**, clique em **Buscar atualizações** e depois em **Atualizar modpack**. A consulta também acontece ao abrir o aplicativo. Quando não há nova versão, **Verificar e reparar** recupera mods ausentes ou corrompidos. O botão **Atualizar aplicativo**, em **Precisa de uma mão?**, leva às releases do próprio instalador.
 
+O servidor Astral pode exigir o modpack atual antes de permitir a entrada no mundo. Quem estiver com um pack antigo recebe uma mensagem com a versão necessária e a orientação de atualizar pelo instalador. Depois de atualizar, **feche e abra o Minecraft novamente** para carregar os novos mods.
+
 O aplicativo lembra a última escolha e a pasta de cada launcher. Instalar no Prism não modifica uma instalação do SKlauncher ou do launcher oficial. Quem usa a versão 1.0 pode atualizar o aplicativo: a instalação oficial existente continua no mesmo local.
 
 A tela inicial é um seletor no estilo de biblioteca de jogos: role o mouse, use as setas do teclado, arraste ou clique nos cartões laterais para trocar de launcher, e **Enter** ou **Preparar meu Astral** para escolher. **← Escolher outro launcher** (ou Esc) volta para a escolha. Os efeitos sonoros são sintetizados no próprio aplicativo e podem ser desligados em **Som ligado**; **Animações** pausa o movimento, que também fica desativado quando o sistema pede movimento reduzido.
@@ -112,13 +114,14 @@ src/main.cjs    Aplicativo Electron e IPC
 src/preload.cjs API isolada para a interface
 src/ui/         Interface local em português
 channel/        Manifesto público de atualização do modpack
+modpack-guard/  Mod Fabric que identifica o pack na conexão com o servidor
 scripts/        Publicação do canal, verificação e geração de recursos
 test/           Instalação, atualização, corrupção, cancelamento e recuperação
 ```
 
 O renderer tem sandbox, isolamento de contexto, Node desativado e nenhuma conexão de rede. Downloads e acesso aos arquivos acontecem no processo principal, por uma API limitada. O aplicativo não solicita nem armazena credenciais Microsoft.
 
-Os 23 testes cobrem os quatro launchers, armazenamento personalizado, isolamento das instalações e recuperação após falha, usando servidor HTTP de loopback e pastas temporárias. Para verificar também o **pack real publicado em todos os formatos**, com download de todos os mods e validação dos arquivos instalados:
+Os testes cobrem os quatro launchers, armazenamento personalizado, isolamento das instalações, recuperação após falha e a identificação do modpack, usando servidor HTTP de loopback e pastas temporárias. Para verificar também o **pack real publicado em todos os formatos**, com download de todos os mods e validação dos arquivos instalados:
 
 ```sh
 npm run verify:live
@@ -138,6 +141,8 @@ O instalador acompanha **`channel/stable.json` na branch `main` deste repositór
 
 O workflow **Publicar modpack** baixa o arquivo anexado, valida o pack, testa a instalação em todos os launchers e publica o canal na `main`. Em poucos minutos o aplicativo mostra **Atualizar modpack**, e a página de instalação do site exibe as novas versões. Se algo falhar, o canal continua como estava e o GitHub avisa por e-mail; a aba **Actions** mostra o motivo. O workflow devolve o selo de release mais recente ao Astral Installer.
 
+O workflow também compila o **Astral Modpack**, um pequeno mod Fabric, e o inclui em `overrides/mods/astral-modpack.jar`. O jar guarda a identificação do conteúdo do pack e responde à consulta do plugin Astral durante a configuração da conexão, antes da entrada no mundo. Funciona nos quatro launchers e na importação direta do `.mrpack`, inclusive com versões anteriores do instalador. A identificação muda quando os arquivos, as dependências ou a versão interna mudam, mesmo quando o exportador repete um número de versão. Reprocessar o mesmo pack não muda sua identidade.
+
 Pode exportar a instância do seu launcher como ela está. Dados locais que o export leva junto, como `.astral/`, `servers.dat`, `local/`, `downloads/`, logs e caches, são removidos do pack, e o anexo da release é trocado pelo pack limpo (`Astral-<versão>.mrpack`).
 
 Para reprocessar uma release já publicada, use **Actions → Publicar modpack → Run workflow** e informe a tag.
@@ -146,12 +151,20 @@ Não apague releases de modpack: o canal baixa o pack do anexo da release public
 
 ### Pela linha de comando
 
-1. Publique o novo `.mrpack` em uma URL HTTPS direta, com nome versionado, para conservar downloads antigos.
-2. Gere o canal a partir do **mesmo arquivo publicado**:
+1. Com **JDK 25 e Gradle 9.5**, compile o identificador e prepare o arquivo que será publicado:
+
+   ```sh
+   gradle -p modpack-guard build
+   npm run pack:prepare -- --pack /caminho/Astral.mrpack --output /caminho/Astral-publicar.mrpack
+   ```
+
+   O identificador está compilado para **Minecraft 26.3**. Ao mudar o Minecraft do pack, adapte e recompile `modpack-guard/`; a publicação recusa um jar de outra versão. O fluxo pelo GitHub continua fazendo essa preparação automaticamente.
+
+2. Publique o `.mrpack` **preparado** em uma URL HTTPS direta, com nome versionado, para conservar downloads antigos. Gere o canal a partir do **mesmo arquivo publicado**:
 
    ```sh
    npm run pack:publish -- \
-     --pack /caminho/Astral.mrpack \
+      --pack /caminho/Astral-publicar.mrpack \
      --url https://astralmc.online/downloads/Astral-2.1.mrpack \
      --version 1.1.0 \
      --name "Astral 2.1" \
@@ -163,6 +176,14 @@ Não apague releases de modpack: o canal baixa o pack do anexo da release public
 O comando lê Minecraft e Fabric diretamente do manifesto, valida os caminhos do pack e calcula tamanho e SHA-512. A versão padrão é `versionId` do `.mrpack`; `--version` permite usar uma versão pública diferente. A detecção de mudanças usa o hash do pacote, inclusive quando um exportador repete o `versionId`.
 
 O pack inicial chama-se **Astral 2.0**, mas seu `versionId` interno é **1.0.0**. Esses são os valores do arquivo já distribuído pelo site.
+
+### Ativar o bloqueio de versões antigas no servidor
+
+1. Publique um `.mrpack` pelo workflow atualizado e aguarde a atualização de `channel/stable.json`. O campo `modpack` deve estar presente no canal.
+2. Instale a versão do plugin **Astral** que inclui `nucleo/modpack/` e reinicie o servidor. A verificação fica ligada por padrão, inclusive em configurações antigas.
+3. Quem usa um pack anterior, sem o identificador, recebe a mesma orientação de atualização. Após atualizar e reiniciar o jogo, pode entrar normalmente.
+
+O plugin consulta este mesmo canal a cada 60 segundos, guarda a última resposta válida em `plugins/Astral/modpack-canal.json` e aceita somente a identidade publicada. `modpack.ativado`, `modpack.canal`, os prazos e a mensagem ficam no `config.yml` do servidor. O bloqueio é uma recusa de conexão, sem banimento. Publique o pack identificado **antes** de ativar a verificação no servidor.
 
 ## Gerar e publicar o aplicativo
 

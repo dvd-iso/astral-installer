@@ -1,5 +1,8 @@
 node_modules/
 dist/
+modpack-guard/.gradle/
+modpack-guard/build/
+modpack-guard/run/
 coverage/
 *.log
 .DS_Store

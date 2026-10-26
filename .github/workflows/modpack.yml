@@ -33,11 +33,21 @@ jobs:
           node-version: 24
           cache: npm
       - run: npm ci --omit=dev
+      - run: npm run check && npm test
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 25
+      - uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: 9.5.0
+      - name: Compilar o identificador do modpack
+        run: gradle -p modpack-guard build --no-daemon
       - name: Limpar e validar o .mrpack e gerar o canal
         env:
           GH_TOKEN: ${{ github.token }}
         run: node scripts/publish-release-pack.cjs
-      - name: Testar a instalação nos três launchers
+      - name: Testar a instalação nos quatro launchers
         run: npm run verify:live
       - name: Publicar o canal de atualização
         run: |

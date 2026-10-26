@@ -1,0 +1,7 @@
+{
+  "required": true,
+  "package": "online.astralmc.modpack.mixin",
+  "compatibilityLevel": "JAVA_25",
+  "client": ["ModpackCookieMixin"],
+  "injectors": { "defaultRequire": 1 }
+}

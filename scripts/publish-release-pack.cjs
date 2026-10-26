@@ -10,21 +10,10 @@ const AdmZip = require("adm-zip");
 const { responseFor } = require("../src/core/network.cjs");
 const { readJson, atomicWrite, jsonBytes } = require("../src/core/files.cjs");
 const { buildChannel } = require("./publish-pack.cjs");
+const { preparePack } = require("./prepare-pack.cjs");
+const { isLocalData } = require("../src/core/local-data.cjs");
 
 const CHANNEL = path.join(__dirname, "..", "channel", "stable.json");
-// Exportar uma instância leva junto dados locais do jogo, do launcher e do próprio instalador.
-// Eles nunca vão para os jogadores: a lista de servidores, por exemplo, substituiria a deles.
-const LOCAL_FOLDERS = new Set([".astral", ".mods", "local", "downloads", "logs", "crash-reports", "saves", "screenshots", "backups"]);
-const LOCAL_FILES = new Set(["servers.dat", "servers.dat_old", "command_history.txt", "debug-profile.json", "realms_persistence.json",
-  "usercache.json", "usernamecache.json", "config/.puzzle_cache", "config/sodium-fingerprint.json",
-  "fancymenu_data/last_world.fmdata", "data/fabric_default_resource_packs.json"]);
-
-function isLocalData(entryName) {
-  const prefix = ["overrides/", "client-overrides/"].find((candidate) => entryName.startsWith(candidate));
-  if (!prefix) return false;
-  const relative = entryName.slice(prefix.length).toLowerCase();
-  return LOCAL_FOLDERS.has(relative.split("/")[0]) || [...LOCAL_FILES].some((local) => relative === local || relative.startsWith(`${local}/`));
-}
 
 // Remove os dados locais e devolve o caminho do pack limpo, ou null quando não havia nada a remover.
 function cleanPack(source, destination) {
@@ -87,16 +76,17 @@ async function main() {
     const { versionId } = JSON.parse(new AdmZip(original).readAsText("modrinth.index.json") || "{}");
     const cleanName = `Astral-${String(versionId || release.tag_name).replace(/[^a-zA-Z0-9._-]+/g, "-")}.mrpack`;
     const { file: cleaned, removed } = cleanPack(original, path.join(directory, cleanName));
-    let file = original;
-    if (cleaned) {
+    const prepared = await preparePack(cleaned || original, path.join(directory, cleanName));
+    let file = prepared.file || cleaned || original;
+    if (cleaned || prepared.file) {
       // Valida antes de substituir o anexo da release.
-      await buildChannel(cleaned, { url: asset.browser_download_url });
-      gh("release", "upload", release.tag_name, cleaned, "--clobber", "--repo", process.env.GITHUB_REPOSITORY);
+      await buildChannel(file, { url: asset.browser_download_url });
+      gh("release", "upload", release.tag_name, file, "--clobber", "--repo", process.env.GITHUB_REPOSITORY);
       if (asset.name !== cleanName) gh("release", "delete-asset", release.tag_name, asset.name, "--yes", "--repo", process.env.GITHUB_REPOSITORY);
-      const stat = await fs.stat(cleaned);
+      const stat = await fs.stat(file);
       asset = { name: cleanName, size: stat.size, browser_download_url: `https://github.com/${process.env.GITHUB_REPOSITORY}/releases/download/${encodeURIComponent(release.tag_name)}/${encodeURIComponent(cleanName)}` };
-      file = cleaned;
-      notes.push(`Dados locais removidos do pack: ${removedSummary(removed)}. O anexo da release foi substituído pelo pack limpo.`);
+      if (removed.length) notes.push(`Dados locais removidos do pack: ${removedSummary(removed)}.`);
+      notes.push("O anexo da release foi preparado com a identificação da versão para o servidor Astral.");
     }
 
     const previous = await readJson(CHANNEL, {});
