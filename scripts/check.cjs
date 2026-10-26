@@ -11,7 +11,8 @@ function check(directory) {
 }
 
 for (const directory of ["src", "scripts", "test"]) check(directory);
-if (process.env.GITHUB_REF_TYPE === "tag" && process.env.GITHUB_REF_NAME !== `v${require("../package.json").version}`) {
+if (process.env.GITHUB_REF_TYPE === "tag" && !process.env.GITHUB_REF_NAME?.startsWith("modpack-")
+  && process.env.GITHUB_REF_NAME !== `v${require("../package.json").version}`) {
   throw new Error("A tag da release precisa corresponder à versão em package.json.");
 }
 console.log("Sintaxe JavaScript verificada.");
