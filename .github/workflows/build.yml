@@ -56,6 +56,8 @@ jobs:
             target: linux
             arch: arm64
     runs-on: ${{ matrix.os }}
+    env:
+      SIGN_WINDOWS: ${{ matrix.target == 'win' && github.event_name != 'pull_request' && secrets.SIGNPATH_API_TOKEN != '' }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -75,6 +77,41 @@ jobs:
         run: npm run build -- --${{ matrix.target }} --${{ matrix.arch }}
         env:
           CSC_IDENTITY_AUTO_DISCOVERY: "false"
+      - name: Conferir a assinatura ad-hoc e abrir o app empacotado
+        if: matrix.target == 'mac'
+        run: |
+          shopt -s nullglob
+          apps=(dist/mac*/*.app)
+          [ ${#apps[@]} -eq 1 ] || { echo "Esperado um .app em dist/mac*/"; exit 1; }
+          codesign --verify --deep --strict --verbose=2 "${apps[0]}"
+          codesign -dv "${apps[0]}" 2>&1 | grep -q "Signature=adhoc"
+          "${apps[0]}/Contents/MacOS/Astral Installer" --smoke-test
+      - name: Guardar o instalador sem assinatura
+        id: unsigned
+        if: env.SIGN_WINDOWS == 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: unsigned-${{ matrix.target }}-${{ matrix.arch }}
+          if-no-files-found: error
+          path: dist/*.exe
+          retention-days: 1
+      - name: Assinar pelo SignPath Foundation
+        if: env.SIGN_WINDOWS == 'true'
+        uses: signpath/github-action-submit-signing-request@v1
+        with:
+          api-token: ${{ secrets.SIGNPATH_API_TOKEN }}
+          organization-id: ${{ vars.SIGNPATH_ORGANIZATION_ID }}
+          project-slug: ${{ vars.SIGNPATH_PROJECT_SLUG || 'astral-installer' }}
+          signing-policy-slug: ${{ vars.SIGNPATH_SIGNING_POLICY || 'release-signing' }}
+          github-artifact-id: ${{ steps.unsigned.outputs.artifact-id }}
+          wait-for-completion: true
+          output-artifact-directory: signed
+      - name: Substituir pelo instalador assinado
+        if: env.SIGN_WINDOWS == 'true'
+        shell: bash
+        run: |
+          rm dist/*.exe
+          cp signed/*.exe dist/
       - uses: actions/upload-artifact@v4
         with:
           name: Astral-Installer-${{ matrix.target }}-${{ matrix.arch }}
@@ -99,6 +136,7 @@ jobs:
       - uses: actions/download-artifact@v4
         with:
           path: installers
+          pattern: Astral-Installer-*
           merge-multiple: true
       - name: Calcular checksums
         working-directory: installers

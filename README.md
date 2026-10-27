@@ -17,6 +17,12 @@ Instalador auxiliar para **Windows, macOS e Linux**, com instalação, atualiza�
 
 Também há ZIPs para macOS e checksums SHA-256 em cada release. Os pacotes incluem o runtime do instalador; não é necessário instalar Node ou Java para abrir o aplicativo. O Minecraft e o Java usados para jogar são gerenciados pelo launcher escolhido.
 
+### Primeira abertura
+
+- **Windows:** se aparecer **O Windows protegeu o computador**, clique em **Mais informações → Executar assim mesmo**. O instalador é assinado pelo SignPath Foundation; o aviso some conforme a assinatura ganha reputação.
+- **macOS:** o app não é notarizado pela Apple. Abra-o uma vez, feche o aviso e vá em **Ajustes do Sistema → Privacidade e Segurança → Abrir Mesmo Assim**. No macOS 15 ou mais recente, clicar com o botão direito → **Abrir** não libera mais o app.
+- **Prism Launcher ou Modrinth App, sem o instalador:** baixe o `Astral-<versão>.mrpack` da release `modpack-…` mais recente e importe-o direto no launcher. As atualizações, nesse caso, são feitas manualmente.
+
 ## Como usar
 
 1. Instale e abra seu launcher pelo menos uma vez: **[Minecraft Launcher](https://www.minecraft.net/download)**, **[SKlauncher 4](https://next.skmedix.pl/downloads)** , **[Prism Launcher](https://prismlauncher.org/download/)** ou **[Modrinth App](https://modrinth.com/app)**. Configure sua conta diretamente nele.
@@ -198,7 +204,30 @@ O workflow **Instalar, testar e empacotar** testa a lógica e carrega a interfac
 
 Para publicar uma release, atualize `version` em `package.json` e `package-lock.json`, faça commit e envie uma tag `vX.Y.Z`. Depois que **todos os builds passarem**, o workflow publica os instaladores e `SHA256SUMS.txt` na release correspondente.
 
-Os builds iniciais são **sem assinatura de código**: certificados de Windows e credenciais Apple não estão configurados neste projeto. No macOS, o sistema pode exigir liberação em **Ajustes do Sistema → Privacidade e Segurança**. Para distribuição assinada, configure a assinatura/notarização do electron-builder com os certificados da equipe e GitHub Secrets; não os versione no repositório.
+### Assinatura de código
+
+- **Windows:** o `.exe` é assinado pelo [SignPath Foundation](https://signpath.org), gratuito para projetos open source. O workflow envia o instalador sem assinatura como artifact temporário, aguarda a assinatura e publica somente o arquivo assinado. Configure no repositório o segredo `SIGNPATH_API_TOKEN` e a variável `SIGNPATH_ORGANIZATION_ID`; `SIGNPATH_PROJECT_SLUG` (padrão `astral-installer`) e `SIGNPATH_SIGNING_POLICY` (padrão `release-signing`) são opcionais. A configuração de artifact do projeto no SignPath assina o `.exe` na raiz do ZIP:
+
+  ```xml
+  <artifact-configuration xmlns="http://signpath.io/artifact-configuration/v1">
+    <zip-file>
+      <pe-file path="Astral-Installer-*.exe">
+        <authenticode-sign/>
+      </pe-file>
+    </zip-file>
+  </artifact-configuration>
+  ```
+
+  Sem o segredo, e em pull requests, o build continua gerando o `.exe` sem assinatura.
+- **macOS:** o app recebe assinatura ad-hoc (`mac.identity: "-"`), sem notarização, que exige o Apple Developer Program. A assinatura ad-hoc evita o aviso de app "danificado" no Apple Silicon, mas o Gatekeeper ainda pede liberação em **Privacidade e Segurança**. O workflow confere a assinatura e abre o app empacotado.
+
+Não versione certificados ou tokens no repositório.
+
+Code signing policy: free code signing provided by [SignPath.io](https://about.signpath.io), certificate by [SignPath Foundation](https://signpath.org). Os binários são gerados apenas pelo GitHub Actions a partir deste repositório, e cada release é aprovada pelo mantenedor (dvd-iso). Política de privacidade: [PRIVACY.md](PRIVACY.md).
+
+## Privacidade
+
+O instalador não tem telemetria nem envia dados pessoais. Ele só baixa o canal público, o modpack e os metadados do Minecraft e do Fabric. Veja a [política de privacidade](PRIVACY.md).
 
 ## Licença
 

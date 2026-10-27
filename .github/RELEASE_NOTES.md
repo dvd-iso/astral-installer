@@ -2,6 +2,12 @@
 
 Escolha no aplicativo entre **Minecraft Launcher**, **SKlauncher 4**, **Prism Launcher** e **Modrinth App**. Cada opção mantém sua própria instalação, estado de atualização e backups.
 
+### Primeira abertura
+
+- **Windows:** se aparecer **O Windows protegeu o computador**, clique em **Mais informações → Executar assim mesmo**.
+- **macOS:** abra o app uma vez e depois vá em **Ajustes do Sistema → Privacidade e Segurança → Abrir Mesmo Assim**. No macOS 15 ou mais recente, o clique direito → **Abrir** não libera mais o app.
+- **Prism Launcher ou Modrinth App:** se preferir, baixe o `.mrpack` da release `modpack-…` mais recente e importe-o direto, sem o instalador.
+
 ### Novidades da versão 1.4.0
 
 - Nova tela inicial no estilo de biblioteca de jogos: o launcher em destaque fica no centro e os outros giram ao redor. Troque pela roda do mouse, pelas setas do teclado, arrastando ou clicando nos cartões laterais; **Enter** escolhe.

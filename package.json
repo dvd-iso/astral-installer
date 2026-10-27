@@ -33,12 +33,14 @@
     "productName": "Astral Installer",
     "artifactName": "Astral-Installer-${version}-${os}-${arch}.${ext}",
     "directories": { "output": "dist", "buildResources": "assets" },
-    "files": ["src/**/*", "assets/**/*", "package.json", "LICENSE"],
+    "files": ["src/**/*", "assets/**/*", "package.json", "LICENSE", "PRIVACY.md"],
     "asar": true,
     "mac": {
       "category": "public.app-category.games",
       "target": ["dmg", "zip"],
-      "icon": "assets/icon.png"
+      "icon": "assets/icon.png",
+      "identity": "-",
+      "hardenedRuntime": false
     },
     "win": { "target": ["nsis"], "icon": "assets/icon.png" },
     "nsis": {
