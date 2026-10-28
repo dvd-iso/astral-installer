@@ -1,5 +1,7 @@
 # Política de privacidade
 
+_Última atualização: 28 de outubro de 2026_
+
 Esta política vale para o **Astral Installer** e para o mod **Astral Modpack** (`modpack-guard/`), distribuídos por este repositório.
 
 **Este programa não transfere nenhuma informação para outros sistemas em rede, exceto quando o usuário ou quem instala ou opera o programa pede.** As únicas conexões são as listadas abaixo, e todas servem à função que o usuário escolheu.
@@ -8,7 +10,7 @@ O instalador não tem telemetria, análises, anúncios, contas nem identificador
 
 ## Conexões feitas pelo instalador
 
-Todas usam HTTPS e são downloads comuns. Os servidores recebem apenas o que qualquer requisição HTTP envia: endereço IP, horário e o cabeçalho `User-Agent: Astral-Installer/1.0`. Nenhum dado do computador, das contas ou dos arquivos do jogo é enviado.
+Todas usam HTTPS e são downloads comuns. Os servidores recebem apenas o que qualquer requisição HTTP envia: endereço IP, horário e o cabeçalho `User-Agent: Astral-Installer/1.0 (+https://github.com/dvd-iso/astral-installer)`. Nenhum dado do computador, das contas ou dos arquivos do jogo é enviado.
 
 | Quando | Destino | Para quê |
 | --- | --- | --- |
@@ -36,6 +38,16 @@ Para apagar tudo, desinstale o aplicativo e remova a pasta de dados dele e a pas
 O mod incluído no modpack responde somente quando um servidor pede a chave `astral:modpack` durante a conexão. A resposta é a identificação do pack instalado: versão e hash SHA-256 do conteúdo. Ela não contém dados pessoais, do computador ou da conta. O servidor do Astral usa essa identificação para recusar versões antigas do modpack. O mod não faz outras conexões.
 
 Os demais mods do modpack são de terceiros e seguem as próprias licenças e políticas.
+
+## Seus direitos
+
+Como o instalador não coleta nem envia dados pessoais aos mantenedores do Astral, não há dados seus guardados por nós a partir dele. Os direitos previstos na Lei Geral de Proteção de Dados (LGPD, Lei nº 13.709/2018) — como acesso, correção e eliminação — podem ser exercidos diretamente no seu computador, apagando os arquivos listados acima, ou pelos canais de contato abaixo.
+
+Os dados tratados pelo **servidor** e pelo **site** do Astral têm políticas próprias, disponíveis em <https://astralmc.online/privacidade.html>.
+
+## Alterações
+
+Mudanças nesta política são publicadas neste arquivo, e o histórico fica disponível nos commits do repositório.
 
 ## Contato
 
