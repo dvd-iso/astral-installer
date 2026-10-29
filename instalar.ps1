@@ -21,10 +21,8 @@
 
 	function FalhaAntivirus {
 		Falha 'O antivirus bloqueou o instalador do Astral.'
-		Write-Host '  Isso costuma ser um falso positivo com programas novos. Veja como resolver em'
+		Write-Host '  Isso costuma ser um falso positivo com programas novos. Veja como instalar sem ele em'
 		Write-Host '  https://astralmc.online/instalar.html#antivirus' -ForegroundColor Cyan
-		Write-Host '  ou baixe o arquivo .mrpack e importe no seu launcher:'
-		Write-Host '  https://github.com/dvd-iso/astral-installer/releases/latest' -ForegroundColor Cyan
 		Write-Host ''
 	}
 

@@ -131,6 +131,19 @@ jobs:
           if ($LASTEXITCODE -ne 2) { throw "O instalador não rodou ($LASTEXITCODE)." }
           exit 0
 
+      # Os comandos curtos vêm do site: a cópia de astralmc.online tem de ser igual à do repositório, e o
+      # irm do PowerShell 5.1 tem de recebê-la como texto, do jeito que o GitHub Pages a serve.
+      - name: Scripts publicados no site
+        shell: powershell
+        run: |
+          $site = Invoke-RestMethod https://astralmc.online/instalar.ps1
+          if ($site -isnot [string] -or $site -notmatch 'instalador\.txt') { throw "O irm não recebeu o script como texto." }
+          foreach ($nome in 'instalar.ps1', 'instalar.sh') {
+            Invoke-WebRequest -UseBasicParsing "https://astralmc.online/$nome" -OutFile "site-$nome"
+            cmd /c "git show HEAD:$nome > repo-$nome"
+            if ((Get-FileHash "site-$nome").Hash -ne (Get-FileHash "repo-$nome").Hash) { throw "astralmc.online/$nome está diferente do repositório: copie-o para o astral-site." }
+          }
+
   instalador-macos:
     name: Instalador · macOS
     needs: instalador

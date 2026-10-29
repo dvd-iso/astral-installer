@@ -73,7 +73,7 @@ Programas novos às vezes caem num falso positivo do Windows Defender. O comando
 <details>
 <summary><b>Sem terminal</b></summary>
 
-Baixe o **[Astral.mrpack mais recente](https://github.com/dvd-iso/astral-installer/releases/latest)** e importe-o no Prism (**Adicionar instância → Importar**) ou no Modrinth App (arraste o arquivo para a janela). O mod atualiza o pack do mesmo jeito.
+Baixe o **[Astral.mrpack mais recente](https://astralmc.online/instalar.html#sem-terminal)** e importe-o no Prism (**Adicionar instância → Importar**) ou no Modrinth App (arraste o arquivo para a janela). O mod atualiza o pack do mesmo jeito.
 
 </details>
 
