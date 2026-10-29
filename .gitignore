@@ -10,3 +10,4 @@ Thumbs.db
 .env.*
 !.env.example
 dist/
+instalador/rsrc_windows_*.syso

@@ -50,6 +50,111 @@ jobs:
         run: |
           test -z "$(gofmt -l .)" || { gofmt -l .; exit 1; }
           go vet ./... && go test ./...
-      # Confere que todos os sistemas compilam.
-      - run: sh scripts/build-instalador.sh 0.0.0 dist https://example.invalid
+      # Compila todos os sistemas, com o manifesto apontando para o servidor local dos testes abaixo.
+      - run: sh scripts/build-instalador.sh 0.0.0 dist http://127.0.0.1:8765
       - run: sh -n instalar.sh
+      - uses: actions/upload-artifact@v4
+        with:
+          name: instalador
+          path: dist/
+          retention-days: 3
+
+  instalador-windows:
+    name: Instalador · Windows
+    needs: instalador
+    runs-on: windows-2025
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: instalador/go.mod
+          cache-dependency-path: instalador/go.sum
+      - name: Testes no Windows
+        working-directory: instalador
+        run: go test ./...
+      - uses: actions/download-artifact@v4
+        with:
+          name: instalador
+          path: dist
+      - name: Metadados do .exe
+        run: |
+          foreach ($exe in Get-ChildItem dist\*.exe) {
+            $info = $exe.VersionInfo
+            $info | Format-List ProductName, FileDescription, CompanyName, FileVersion, ProductVersion, OriginalFilename
+            if ($info.ProductName -ne 'Astral' -or $info.FileVersion -ne '0.0.0.0') { throw "$($exe.Name) saiu sem os metadados." }
+          }
+          $saida = & dist\astral-instalador-windows-amd64.exe --versao
+          if ($saida -ne 'Astral Instalador 0.0.0') { throw "Saída inesperada: $saida" }
+      # Verificação com as assinaturas atuais do Windows Defender. Não substitui a nuvem do Defender,
+      # mas pega o falso positivo mais comum em programas Go.
+      - name: Windows Defender
+        run: |
+          Update-MpSignature
+          Get-MpComputerStatus | Format-List AMProductVersion, AntivirusSignatureVersion, AntivirusSignatureLastUpdated
+          $mp = Join-Path $env:ProgramFiles 'Windows Defender\MpCmdRun.exe'
+          foreach ($exe in Get-ChildItem dist\*.exe) {
+            & $mp -Scan -ScanType 3 -File $exe.FullName -DisableRemediation
+            if ($LASTEXITCODE -ne 0) { Get-MpThreatDetection | Format-List; throw "O Defender acusou $($exe.Name) ($LASTEXITCODE)." }
+          }
+      - name: Servidor local
+        run: |
+          $servidor = Start-Process python -ArgumentList '-m', 'http.server', '8765', '--bind', '127.0.0.1', '--directory', (Resolve-Path dist) -PassThru -WindowStyle Hidden
+          for ($i = 0; $i -lt 30; $i++) {
+            try { Invoke-WebRequest -UseBasicParsing http://127.0.0.1:8765/instalador.txt | Out-Null; break } catch { Start-Sleep 1 }
+          }
+      # O comando de instalação de verdade, no PowerShell 5.1 que vem no Windows e no PowerShell 7.
+      # Sem um console, o instalador abre e avisa que precisa de um terminal (código 2): isso prova que ele foi
+      # baixado, conferido e executado.
+      - name: Comando de instalação · PowerShell 5.1
+        shell: powershell
+        env:
+          ASTRAL_MANIFESTO: http://127.0.0.1:8765/instalador.txt
+        run: |
+          Get-Content -Raw instalar.ps1 | Invoke-Expression
+          if ($LASTEXITCODE -ne 2) { throw "O instalador não rodou ($LASTEXITCODE)." }
+          $programa = Join-Path $env:LOCALAPPDATA 'Astral\astral-instalador.exe'
+          $esperado = (Get-FileHash dist\astral-instalador-windows-amd64.exe).Hash
+          if ((Get-FileHash $programa).Hash -ne $esperado) { throw 'O programa salvo não confere.' }
+          $antes = (Get-Item $programa).LastWriteTimeUtc
+          Get-Content -Raw instalar.ps1 | Invoke-Expression
+          if ($LASTEXITCODE -ne 2 -or (Get-Item $programa).LastWriteTimeUtc -ne $antes) { throw 'O programa não foi reaproveitado.' }
+          exit 0
+      - name: Comando de instalação · PowerShell 7
+        shell: pwsh
+        env:
+          ASTRAL_MANIFESTO: http://127.0.0.1:8765/instalador.txt
+        run: |
+          Remove-Item -Recurse -Force (Join-Path $env:LOCALAPPDATA 'Astral')
+          Get-Content -Raw instalar.ps1 | Invoke-Expression
+          if ($LASTEXITCODE -ne 2) { throw "O instalador não rodou ($LASTEXITCODE)." }
+          exit 0
+
+  instalador-macos:
+    name: Instalador · macOS
+    needs: instalador
+    runs-on: macos-15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: instalador/go.mod
+          cache-dependency-path: instalador/go.sum
+      - name: Testes no macOS
+        working-directory: instalador
+        run: go test ./...
+      - uses: actions/download-artifact@v4
+        with:
+          name: instalador
+          path: dist
+      - name: Assinatura do binário
+        run: codesign --verify --verbose dist/astral-instalador-darwin-arm64
+      # O comando de instalação de verdade; o script dá um terminal (/dev/tty) ao instalar.sh.
+      - name: Comando de instalação
+        env:
+          ASTRAL_MANIFESTO: http://127.0.0.1:8765/instalador.txt
+        run: |
+          python3 -m http.server 8765 --bind 127.0.0.1 --directory dist >/dev/null 2>&1 &
+          for i in $(seq 30); do curl -fs http://127.0.0.1:8765/instalador.txt >/dev/null && break; sleep 1; done
+          script -q saida.txt sh instalar.sh --versao
+          cat saida.txt
+          grep -q 'Astral Instalador 0.0.0' saida.txt

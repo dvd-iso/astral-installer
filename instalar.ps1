@@ -3,7 +3,11 @@
 #   irm https://astralmc.online/instalar.ps1 | iex
 #
 # Baixa o instalador, confere o SHA-256 publicado em channel/instalador.txt e o abre nesta janela.
-# Um programa baixado pelo PowerShell não passa pelo SmartScreen; ele é apagado ao terminar.
+# Um programa baixado pelo PowerShell nao passa pelo SmartScreen.
+#
+# O programa fica em %LOCALAPPDATA%\Astral, como fazem os instaladores do Scoop e do Bun, e e reaproveitado
+# enquanto a versao publicada nao mudar. Um .exe de nome aleatorio rodando do TEMP e apagado em seguida e
+# justamente o que os antivirus esperam de um programa malicioso.
 & {
 	$ErrorActionPreference = 'Stop'
 	$ProgressPreference = 'SilentlyContinue' # A barra do Invoke-WebRequest deixa o download muito mais lento no PowerShell 5.
@@ -13,6 +17,29 @@
 		Write-Host ''
 		Write-Host "x $mensagem" -ForegroundColor Red
 		Write-Host ''
+	}
+
+	function FalhaAntivirus {
+		Falha 'O antivirus bloqueou o instalador do Astral.'
+		Write-Host '  Isso costuma ser um falso positivo com programas novos. Veja como resolver em'
+		Write-Host '  https://astralmc.online/instalar.html#antivirus' -ForegroundColor Cyan
+		Write-Host '  ou baixe o arquivo .mrpack e importe no seu launcher:'
+		Write-Host '  https://github.com/dvd-iso/astral-installer/releases/latest' -ForegroundColor Cyan
+		Write-Host ''
+	}
+
+	# ERROR_VIRUS_INFECTED (225): o Windows Defender barrou o arquivo ao gravar ou ao executar.
+	function Bloqueado($erro) {
+		$excecao = $erro.Exception
+		while ($excecao) {
+			if ($excecao.HResult -eq -2147024671 -or $excecao.NativeErrorCode -eq 225) { return $true }
+			$excecao = $excecao.InnerException
+		}
+		return $false
+	}
+
+	function Sha256($caminho) {
+		(Get-FileHash -Algorithm SHA256 -LiteralPath $caminho).Hash.ToLowerInvariant()
 	}
 
 	$manifesto = if ($env:ASTRAL_MANIFESTO) { $env:ASTRAL_MANIFESTO } else { 'https://raw.githubusercontent.com/dvd-iso/astral-installer/main/channel/instalador.txt' }
@@ -36,19 +63,42 @@
 		if ($partes.Count -ge 3 -and $partes[0] -eq $alvo) { $campos = $partes }
 	}
 	if (-not $campos) { Falha "Ainda nao ha instalador para $alvo."; return }
+	$esperado = $campos[1].ToLowerInvariant()
 
-	$programa = Join-Path ([IO.Path]::GetTempPath()) ("astral-instalador-" + [Guid]::NewGuid().ToString('N') + '.exe')
-	try {
+	$base = if ($env:LOCALAPPDATA) { $env:LOCALAPPDATA } else { [IO.Path]::GetTempPath() }
+	$pasta = Join-Path $base 'Astral'
+	$programa = Join-Path $pasta 'astral-instalador.exe'
+	$pronto = $false
+	try { $pronto = (Test-Path -LiteralPath $programa) -and (Sha256 $programa) -eq $esperado } catch { }
+
+	if (-not $pronto) {
+		$parcial = "$programa.part"
 		try {
-			Invoke-WebRequest -UseBasicParsing -Uri $campos[2] -OutFile $programa
+			New-Item -ItemType Directory -Force -Path $pasta | Out-Null
+			Invoke-WebRequest -UseBasicParsing -Uri $campos[2] -OutFile $parcial
 		} catch {
-			Falha 'O download do instalador falhou. Tente de novo.'; return
+			Remove-Item -LiteralPath $parcial -Force -ErrorAction SilentlyContinue
+			if (Bloqueado $_) { FalhaAntivirus } else { Falha 'O download do instalador falhou. Tente de novo.' }
+			return
 		}
-		if ((Get-FileHash -Algorithm SHA256 -LiteralPath $programa).Hash.ToLowerInvariant() -ne $campos[1].ToLowerInvariant()) {
+		# O antivirus pode tirar o arquivo da pasta logo depois de gravado.
+		if (-not (Test-Path -LiteralPath $parcial)) { FalhaAntivirus; return }
+		try { $obtido = Sha256 $parcial } catch { FalhaAntivirus; return }
+		if ($obtido -ne $esperado) {
+			Remove-Item -LiteralPath $parcial -Force -ErrorAction SilentlyContinue
 			Falha 'O instalador baixado nao confere com o publicado. Tente de novo.'; return
 		}
+		try {
+			Move-Item -LiteralPath $parcial -Destination $programa -Force
+		} catch {
+			Remove-Item -LiteralPath $parcial -Force -ErrorAction SilentlyContinue
+			Falha 'O instalador do Astral ja esta aberto em outra janela. Feche-o e rode o comando de novo.'; return
+		}
+	}
+
+	try {
 		& $programa
-	} finally {
-		Remove-Item -LiteralPath $programa -Force -ErrorAction SilentlyContinue
+	} catch {
+		if (Bloqueado $_) { FalhaAntivirus } else { Falha "Nao deu para abrir o instalador: $($_.Exception.Message)" }
 	}
 }

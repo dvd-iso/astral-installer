@@ -32,7 +32,13 @@ Abra o launcher uma vez antes, para ele criar as pastas e você entrar na conta.
 
 ### Por que um comando, e não um arquivo para baixar
 
-Um programa baixado pelo navegador ganha a marca de “veio da internet”. Sem uma assinatura paga, o Windows mostra o SmartScreen e o macOS bloqueia pelo Gatekeeper, inclusive scripts `.bat` e `.command`. O que o terminal baixa não recebe essa marca. O comando baixa o instalador do seu sistema a partir de `channel/instalador.txt`, confere o SHA-256 publicado, executa e apaga o programa ao terminar.
+Um programa baixado pelo navegador ganha a marca de “veio da internet”. Sem uma assinatura paga, o Windows mostra o SmartScreen e o macOS bloqueia pelo Gatekeeper, inclusive scripts `.bat` e `.command`. O que o terminal baixa não recebe essa marca. O comando baixa o instalador do seu sistema a partir de `channel/instalador.txt`, confere o SHA-256 publicado e o executa. No macOS e no Linux o programa é apagado ao terminar. No Windows ele fica em `%LOCALAPPDATA%\Astral` e só é baixado de novo quando sai uma versão nova, como fazem o Scoop e o Bun: um `.exe` de nome aleatório rodando da pasta temporária e apagado logo depois é exatamente o que os antivírus procuram.
+
+### Se o antivírus barrar
+
+O SmartScreen não aparece, mas o Windows Defender ainda analisa o programa, e programas novos sem assinatura às vezes caem num falso positivo. Para diminuir esse risco, o `.exe` sai com nome, versão, ícone e manifesto (`instalador/winres`), e o CI compila e verifica cada versão com o Defender num Windows real. Se o Defender bloquear, o comando avisa e indica o `.mrpack` como alternativa.
+
+Quando um jogador relatar um bloqueio, envie o arquivo da versão a [Microsoft como falso positivo](https://www.microsoft.com/en-us/wdsi/filesubmission) (**Software developer → Incorrectly detected as malware**). A liberação costuma sair em um a três dias e vale para todos.
 
 ### Sem terminal
 

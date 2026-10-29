@@ -10,6 +10,11 @@ mkdir -p "$saida"
 saida=$(cd "$saida" && pwd)
 manifesto="$saida/instalador.txt"
 printf '1\t%s\n' "$versao" >"$manifesto"
+# Nome, versão, ícone e manifesto no .exe (instalador/winres): um executável sem nada disso pesa contra ele
+# na análise do Windows Defender. O go build inclui os .syso só ao compilar para o Windows.
+trap 'rm -f "$raiz"/instalador/rsrc_windows_*.syso' EXIT
+(cd "$raiz/instalador" && go run github.com/tc-hib/go-winres@v0.3.3 make --arch amd64,arm64 \
+	--file-version "$versao.0" --product-version "$versao.0")
 for alvo in windows-amd64 windows-arm64 darwin-amd64 darwin-arm64 linux-amd64 linux-arm64; do
 	sistema=${alvo%-*}
 	arquitetura=${alvo#*-}
