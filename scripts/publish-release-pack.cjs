@@ -8,11 +8,11 @@ const { Readable } = require("node:stream");
 const { pipeline } = require("node:stream/promises");
 const { setTimeout: delay } = require("node:timers/promises");
 const AdmZip = require("adm-zip");
-const { responseFor } = require("../src/core/network.cjs");
-const { readJson, atomicWrite, jsonBytes } = require("../src/core/files.cjs");
+const { responseFor } = require("../lib/network.cjs");
+const { readJson, atomicWrite, jsonBytes } = require("../lib/files.cjs");
 const { buildChannel } = require("./publish-pack.cjs");
 const { preparePack } = require("./prepare-pack.cjs");
-const { isLocalData } = require("../src/core/local-data.cjs");
+const { isLocalData } = require("../lib/local-data.cjs");
 
 const CHANNEL = path.join(__dirname, "..", "channel", "stable.json");
 
@@ -40,7 +40,7 @@ function removedSummary(removed) {
   return [...groups].map(([name, count]) => (count > 1 ? `${name} (${count} arquivos)` : name)).join(", ");
 }
 
-// O texto da release aparece no aplicativo como novidades da versão.
+// O texto da release aparece no jogo como novidades da versão (tela de atualização do mod).
 function releaseNotes(body) {
   const text = (body || "").replace(/\r\n/g, "\n").trim();
   return text.length > 1500 ? `${text.slice(0, 1497)}…` : text;

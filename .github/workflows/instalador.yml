@@ -1,0 +1,61 @@
+name: Publicar instalador
+
+# Compila o instalador (instalador/) para Windows, macOS e Linux, publica os binários numa release
+# instalador-vX.Y.Z e atualiza channel/instalador.txt, que os comandos instalar.sh e instalar.ps1 leem.
+on:
+  workflow_dispatch:
+    inputs:
+      versao:
+        description: "Versão do instalador (ex.: 1.0.0)"
+        required: true
+
+permissions:
+  contents: write
+
+concurrency:
+  group: instalador
+  cancel-in-progress: false
+
+jobs:
+  publicar:
+    name: Instalador ${{ inputs.versao }}
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: instalador/go.mod
+          cache-dependency-path: instalador/go.sum
+      - name: Conferir a versão
+        env:
+          VERSAO: ${{ inputs.versao }}
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          echo "$VERSAO" | grep -Eq '^[0-9]+\.[0-9]+\.[0-9]+$' || { echo "Use o formato 1.2.3."; exit 1; }
+          if gh release view "instalador-v$VERSAO" >/dev/null 2>&1; then echo "A versão $VERSAO já foi publicada."; exit 1; fi
+      - name: Testar
+        working-directory: instalador
+        run: go vet ./... && go test ./...
+      - name: Compilar
+        env:
+          VERSAO: ${{ inputs.versao }}
+        run: sh scripts/build-instalador.sh "$VERSAO" dist "https://github.com/${{ github.repository }}/releases/download/instalador-v$VERSAO"
+      - name: Publicar a release
+        env:
+          VERSAO: ${{ inputs.versao }}
+          GH_TOKEN: ${{ github.token }}
+        # --latest=false: o link "mais recente" do repositório continua entregando o modpack.
+        run: |
+          gh release create "instalador-v$VERSAO" dist/astral-instalador-* --target main --latest=false \
+            --title "Instalador $VERSAO" \
+            --notes "Instalador do modpack Astral. Não baixe estes arquivos: use o comando de instalação de https://astralmc.online/instalar.html."
+      - name: Publicar o manifesto
+        run: |
+          cp dist/instalador.txt channel/instalador.txt
+          git add channel/instalador.txt
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git commit -m "Instalador ${{ inputs.versao }}"
+          git push origin HEAD:main

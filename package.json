@@ -1,9 +1,8 @@
 {
   "name": "astral-installer",
-  "version": "1.4.0",
-  "description": "Instalador e atualizador do Astral para Minecraft Launcher, SKlauncher, Prism Launcher e Modrinth App.",
+  "version": "2.0.0",
+  "description": "Instalador e atualizações do modpack Astral: comando de terminal com TUI e o mod Astral Modpack, que atualiza o pack de dentro do jogo.",
   "private": true,
-  "main": "src/main.cjs",
   "author": "Astral <https://astralmc.online>",
   "license": "MIT",
   "repository": {
@@ -12,48 +11,13 @@
   },
   "engines": { "node": ">=22" },
   "scripts": {
-    "start": "electron .",
-    "test": "node --test",
+    "test": "node --test \"test/*.test.cjs\"",
     "check": "node scripts/check.cjs",
     "verify:live": "node scripts/verify-live-pack.cjs",
     "pack:prepare": "node scripts/prepare-pack.cjs",
-    "pack:publish": "node scripts/publish-pack.cjs",
-    "build": "electron-builder --publish never",
-    "build:dir": "electron-builder --dir --publish never"
+    "pack:publish": "node scripts/publish-pack.cjs"
   },
   "dependencies": {
     "adm-zip": "0.6.1"
-  },
-  "devDependencies": {
-    "electron": "45.0.0",
-    "electron-builder": "26.18.0"
-  },
-  "build": {
-    "appId": "online.astralmc.installer",
-    "productName": "Astral Installer",
-    "artifactName": "Astral-Installer-${version}-${os}-${arch}.${ext}",
-    "directories": { "output": "dist", "buildResources": "assets" },
-    "files": ["src/**/*", "assets/**/*", "package.json", "LICENSE"],
-    "asar": true,
-    "mac": {
-      "category": "public.app-category.games",
-      "target": ["dmg", "zip"],
-      "icon": "assets/icon.png"
-    },
-    "win": { "target": ["nsis"], "icon": "assets/icon.png" },
-    "nsis": {
-      "oneClick": false,
-      "perMachine": false,
-      "allowToChangeInstallationDirectory": true,
-      "createDesktopShortcut": true,
-      "shortcutName": "Astral Installer"
-    },
-    "linux": {
-      "target": ["AppImage", "deb"],
-      "category": "Game",
-      "icon": "assets/icon.png",
-      "maintainer": "Astral <dvd-iso@users.noreply.github.com>"
-    },
-    "publish": null
   }
 }

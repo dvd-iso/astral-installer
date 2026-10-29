@@ -6,9 +6,9 @@ const path = require("node:path");
 const AdmZip = require("adm-zip");
 const { preparePack } = require("../scripts/prepare-pack.cjs");
 const { buildChannel } = require("../scripts/publish-pack.cjs");
-const { readPack, validateChannel } = require("../src/core/pack.cjs");
-const { packIdentity, GUARD_PATH, IDENTITY_FILE } = require("../src/core/modpack-identity.cjs");
-const { hashFile, jsonBytes } = require("../src/core/files.cjs");
+const { readPack, validateChannel } = require("../lib/pack.cjs");
+const { packIdentity, GUARD_PATH, IDENTITY_FILE, MANIFEST_FILE } = require("../lib/modpack-identity.cjs");
+const { hashFile, jsonBytes } = require("../lib/files.cjs");
 
 async function fixture(t) {
   const root = await fs.mkdtemp(path.join(os.tmpdir(), "astral-modpack-test-"));
@@ -37,6 +37,10 @@ test("embute o identificador no mrpack e publica a mesma identidade no canal", a
   const jar = new AdmZip(marker.data);
   assert.equal(jar.readAsText("client.class"), "conteúdo compilado preservado");
   assert.equal(jar.readAsText(IDENTITY_FILE), `1\n${identity.contentSha256}\n2.1`);
+  // Formato lido por PackManifest.java: cabeçalho e uma linha "sha512<TAB>caminho" por arquivo, sem o próprio mod.
+  const lines = pack.files.filter((file) => file.path !== GUARD_PATH).map((file) => `${file.sha512}\t${file.path}\n`).sort();
+  assert.equal(jar.readAsText(MANIFEST_FILE), `1\t2.1\t26.3\t0.19.5\n${lines.join("")}`);
+  assert.equal(lines.length, 2);
   const { channel } = await buildChannel(f.destination, { url: "https://example.com/Astral.mrpack" });
   assert.deepEqual(channel.modpack, identity);
   assert.equal(channel.pack.sha512, await hashFile(f.destination));
@@ -57,12 +61,15 @@ test("preparar um export real remove dados locais da cópia sem alterar o origin
   const f = await fixture(t);
   f.zip.addFile("overrides/.astral/backups/backup/manifest.json", Buffer.from("backup pessoal"));
   f.zip.addFile("client-overrides/servers.dat", Buffer.from("servidores pessoais"));
+  f.zip.addFile("overrides/dreamdisplays/ffmpeg/linux-x64/ffmpeg", Buffer.from("binário de Linux"));
+  f.zip.addFile("overrides/dreamdisplays/native/linux-x64/libavcodec.so", Buffer.from("biblioteca de Linux"));
+  f.zip.addFile("overrides/libs/yt-dlp/yt-dlp", Buffer.from("yt-dlp"));
   f.zip.writeZip(f.source);
   const before = await hashFile(f.source);
   const { removed } = await preparePack(f.source, f.destination, f);
-  assert.equal(removed.length, 2);
+  assert.equal(removed.length, 5);
   assert.equal(await hashFile(f.source), before);
-  assert(!readPack(f.destination).files.some((file) => file.path.startsWith(".astral/") || file.path === "servers.dat"));
+  assert(!readPack(f.destination).files.some((file) => /^(?:\.astral|dreamdisplays|libs)\//.test(file.path) || file.path === "servers.dat"));
   assert(packIdentity(readPack(f.destination)));
 });
 
@@ -73,6 +80,11 @@ test("mudanças nos mods exigem atualização mesmo quando o exportador repete a
   changed.updateFile("overrides/mods/example.jar", Buffer.from("mod atualizado"));
   changed.writeZip(f.source);
   await assert.rejects(buildChannel(f.source, { url: "https://example.com/Astral.mrpack" }), /pack mudou/);
+  // Mudar só uma configuração não muda a identidade dos mods, mas deixa a lista do atualizador velha.
+  const config = new AdmZip(f.destination);
+  config.updateFile("overrides/config/example.json", Buffer.from("outra preferência"));
+  config.writeZip(path.join(f.root, "config.mrpack"));
+  await assert.rejects(buildChannel(path.join(f.root, "config.mrpack"), { url: "https://example.com/Astral.mrpack" }), /pack mudou|lista de arquivos/);
   const second = await preparePack(f.source, f.destination, f);
   assert.equal(second.identity.version, first.identity.version);
   assert.notEqual(second.identity.contentSha256, first.identity.contentSha256);

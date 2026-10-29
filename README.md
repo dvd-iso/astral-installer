@@ -1,205 +1,131 @@
 # Astral Installer
 
-**O modpack do [Astral](https://astralmc.online), pronto no Minecraft Launcher, SKlauncher, Prism Launcher e Modrinth App.**
+**O modpack do [Astral](https://astralmc.online) em qualquer sistema, sem programa para o SmartScreen ou o Gatekeeper barrarem.**
 
-Instalador auxiliar para **Windows, macOS e Linux**, com instalação, atualização e reparo do modpack. Escolha entre **Minecraft Launcher oficial**, **SKlauncher 4**, **Prism Launcher** e **Modrinth App**: cada um recebe seu próprio perfil ou instância **Astral**, com arquivos e atualizações independentes.
+Um comando no terminal abre o instalador: escolha o launcher, acompanhe o download e jogue. Depois, o mod **Astral Modpack**, que vem dentro do pack, mantém tudo atualizado de dentro do jogo.
 
-## Baixar
+## Instalar
 
-**[Baixar a versão mais recente](https://github.com/dvd-iso/astral-installer/releases/latest)**
+**Windows:** abra o **PowerShell** (ou o Terminal) e cole:
 
-| Sistema | Arquivo |
-| --- | --- |
-| Windows 10/11 · x64 | `Astral-Installer-…-win-x64.exe` |
-| macOS · Apple Silicon | `Astral-Installer-…-mac-arm64.dmg` |
-| macOS · Intel | `Astral-Installer-…-mac-x64.dmg` |
-| Linux · x64 ou ARM64 | `Astral-Installer-…-linux-….AppImage` ou `.deb` |
+```powershell
+irm https://astralmc.online/instalar.ps1 | iex
+```
 
-Também há ZIPs para macOS e checksums SHA-256 em cada release. Os pacotes incluem o runtime do instalador; não é necessário instalar Node ou Java para abrir o aplicativo. O Minecraft e o Java usados para jogar são gerenciados pelo launcher escolhido.
-
-## Como usar
-
-1. Instale e abra seu launcher pelo menos uma vez: **[Minecraft Launcher](https://www.minecraft.net/download)**, **[SKlauncher 4](https://next.skmedix.pl/downloads)** , **[Prism Launcher](https://prismlauncher.org/download/)** ou **[Modrinth App](https://modrinth.com/app)**. Configure sua conta diretamente nele.
-2. Feche o jogo e o launcher. Abra o **Astral Installer** e escolha seu launcher nos quatro cartões.
-3. Confira a pasta detectada. Se necessário, use **Localizar launcher** e escolha a pasta de dados indicada na tabela abaixo.
-4. Clique em **Instalar Astral** e aguarde.
-5. Clique em **Abrir [seu launcher]** e selecione **Astral**. O launcher prepara os arquivos do jogo e o Java conforme necessário.
-
-| Launcher | Como identificar a pasta de dados | Primeiro uso |
-| --- | --- | --- |
-| Minecraft Launcher | `launcher_profiles.json` ou `launcher_profiles_microsoft_store.json` | Use sua conta Microsoft com Minecraft Java. Se o perfil estiver oculto, habilite **Modificadas** na aba **Instalações**. |
-| SKlauncher 4 | `instances.json` | Selecione **Astral** e use **Instalar** no SKlauncher para preparar Minecraft/assets/Java. |
-| Prism Launcher | `prismlauncher.cfg` | A instância aparece na lista. Em instalações portáteis, encontre a raiz em **Pastas → Pasta do launcher**. |
-| Modrinth App | Não precisa | O Modrinth App abre a importação do Astral. Confirme; o aviso de modpack fora do Modrinth é esperado. Veja abaixo como atualizar. |
-
-Para atualizar, reabra o instalador, **selecione o mesmo launcher**, clique em **Buscar atualizações** e depois em **Atualizar modpack**. A consulta também acontece ao abrir o aplicativo. Quando não há nova versão, **Verificar e reparar** recupera mods ausentes ou corrompidos. O botão **Atualizar aplicativo**, em **Precisa de uma mão?**, leva às releases do próprio instalador.
-
-O servidor Astral pode exigir o modpack atual antes de permitir a entrada no mundo. Quem estiver com um pack antigo recebe uma mensagem com a versão necessária e a orientação de atualizar pelo instalador. Depois de atualizar, **feche e abra o Minecraft novamente** para carregar os novos mods.
-
-O aplicativo lembra a última escolha e a pasta de cada launcher. Instalar no Prism não modifica uma instalação do SKlauncher ou do launcher oficial. Quem usa a versão 1.0 pode atualizar o aplicativo: a instalação oficial existente continua no mesmo local.
-
-A tela inicial é um seletor no estilo de biblioteca de jogos: role o mouse, use as setas do teclado, arraste ou clique nos cartões laterais para trocar de launcher, e **Enter** ou **Preparar meu Astral** para escolher. **← Escolher outro launcher** (ou Esc) volta para a escolha. Os efeitos sonoros são sintetizados no próprio aplicativo e podem ser desligados em **Som ligado**; **Animações** pausa o movimento, que também fica desativado quando o sistema pede movimento reduzido.
-
-### Pasta do modpack
-
-**Minecraft Launcher oficial:**
-
-| Sistema | Pasta padrão |
-| --- | --- |
-| Windows | `%APPDATA%\.minecraft\astral` |
-| macOS | `~/Library/Application Support/minecraft/astral` |
-| Linux | `~/.minecraft/astral` |
-| Linux · Flatpak | `~/.var/app/com.mojang.Minecraft/.minecraft/astral` |
-
-O instalador reconhece os arquivos de perfis dos launchers clássico e Microsoft Store e adiciona seu próprio perfil, preservando os demais.
-
-**SKlauncher 4:**
-
-| Sistema | Pasta padrão |
-| --- | --- |
-| Windows | `%APPDATA%\.sklauncher\instances\astral-installer` |
-| macOS | `~/Library/Application Support/sklauncher/instances/astral-installer` |
-| Linux | `~/.sklauncher/instances/astral-installer` |
-
-A instância é registrada em `instances.json`, com Minecraft/Fabric fixados nas versões do pack. A configuração `location.json → dataDir` é respeitada quando o armazenamento foi movido; **Localizar launcher** continua apontando para a pasta de configuração que contém `instances.json`.
-
-O SKlauncher termina a preparação de Minecraft, assets e Java por seu fluxo nativo **Instalar**. Uma atualização só de mods conserva o estado de preparação; mudar Minecraft ou Fabric solicita nova preparação. O suporte nativo é para **SKlauncher 4**, cujo formato foi conferido no build 4.0.40. O SKlauncher 3 usa outro formato.
-
-**Prism Launcher:**
-
-| Sistema | Pasta padrão |
-| --- | --- |
-| Windows | `%APPDATA%\PrismLauncher\instances\astral-installer\minecraft` |
-| macOS | `~/Library/Application Support/PrismLauncher/instances/astral-installer/minecraft` |
-| Linux | `~/.local/share/PrismLauncher/instances/astral-installer/minecraft` |
-| Linux · Flatpak | `~/.var/app/org.prismlauncher.PrismLauncher/data/PrismLauncher/instances/astral-installer/minecraft` |
-
-São gerados `instance.cfg` e `mmc-pack.json` no formato nativo. O `InstanceDir` configurado em `prismlauncher.cfg`, `XDG_DATA_HOME`, instalações Scoop e pastas portáteis são respeitados. Minecraft, Fabric, bibliotecas e Java são preparados pelo Prism ao jogar.
-
-**Modrinth App:**
-
-O Modrinth App guarda as instâncias num banco de dados interno que muda a cada versão do app, então o instalador não escreve nele. Ele baixa e verifica o `.mrpack` publicado, salva o arquivo em `Downloads/Astral` e o abre no Modrinth App, que cria a instância **Astral** com Minecraft, Fabric, mods e Java. O Modrinth App não precisa estar fechado.
-
-Para atualizar, clique em **Atualizar modpack**: o instalador deixa o novo `Astral-<versão>.mrpack` em `Downloads/Astral` e abre a pasta. No Modrinth App, abra a instância **Astral** e vá em **Configurações → Instalação → Reinstalar modpack**, escolhendo esse arquivo. Abrir o arquivo de novo no app criaria uma segunda instância. Se o app não abrir sozinho, arraste o arquivo para a janela dele.
-
-Nos dois launchers de instâncias, `astral-installer` é o ID interno e **Astral** é o nome exibido. Se esse ID já pertencer a outra instalação, o aplicativo informa a colisão e preserva seus arquivos. As demais instâncias e as contas do launcher são mantidas.
-
-### O que acontece em uma atualização
-
-- O canal público informa a versão e o SHA-512 do `.mrpack`.
-- Mods e recursos são baixados das URLs originais do pacote e verificados por hash.
-- Arquivos corretos são reaproveitados; downloads já verificados ficam em cache.
-- Mods antigos só são removidos se estiverem registrados como arquivos do pack.
-- Mundos, capturas e arquivos adicionados pelo jogador ficam preservados.
-- Configurações em `config/`, `options.txt`, `optionsof.txt` e `servers.dat` alteradas localmente são preservadas. Os novos defaults de overrides ficam em `.astral/defaults/`.
-- A aplicação cria backup dos arquivos substituídos/removidos, incluindo os registros da instância no launcher, em `.astral/backups/` dentro da pasta do modpack. Se ocorrer falha durante a aplicação, as alterações são revertidas. Uma aplicação interrompida é recuperada na próxima instalação.
-- O estado da versão só é gravado depois dos arquivos e dos perfis. Cancelar durante os downloads mantém a versão instalada.
-
-Os backups e o cache ficam disponíveis na pasta do pack. Podem ser removidos para liberar espaço **com o aplicativo fechado e sem `transaction.json` pendente**; a instalação continua registrada em `.astral/state.json`.
-
-## Desenvolvimento
-
-Requisitos: Node 22 ou superior; Node 24 é usado nos builds. A interface usa Electron e o núcleo funciona em Node independente da interface.
+**macOS e Linux:** abra o **Terminal** e cole:
 
 ```sh
-npm ci
-npm run check
-npm test
-npm start
+curl -fsSL https://astralmc.online/instalar.sh | sh
 ```
 
-```text
-src/core/       Importação mrpack, downloads, adaptadores dos launchers e atualização transacional
-src/main.cjs    Aplicativo Electron e IPC
-src/preload.cjs API isolada para a interface
-src/ui/         Interface local em português
-channel/        Manifesto público de atualização do modpack
-modpack-guard/  Mod Fabric que identifica o pack na conexão com o servidor
-scripts/        Publicação do canal, verificação e geração de recursos
-test/           Instalação, atualização, corrupção, cancelamento e recuperação
-```
+O instalador aparece na própria janela do terminal. Escolha onde você joga:
 
-O renderer tem sandbox, isolamento de contexto, Node desativado e nenhuma conexão de rede. Downloads e acesso aos arquivos acontecem no processo principal, por uma API limitada. O aplicativo não solicita nem armazena credenciais Microsoft.
+| Launcher | O que o instalador faz |
+| --- | --- |
+| **Prism Launcher** (recomendado) | Cria a instância **Astral** e baixa o pack e todos os mods |
+| **Modrinth App** | Baixa o pack e abre o app para confirmar a importação |
+| **Minecraft Launcher** | Instala o Fabric, os mods e o perfil **Astral** |
+| **SKlauncher 4** | Cria a instância **Astral**. Use **Instalar** nela na primeira vez |
+| **Outro launcher** | Salva o `Astral.mrpack` em Downloads para importar (ATLauncher, MultiMC…) |
 
-Os testes cobrem os quatro launchers, armazenamento personalizado, isolamento das instalações, recuperação após falha e a identificação do modpack, usando servidor HTTP de loopback e pastas temporárias. Para verificar também o **pack real publicado em todos os formatos**, com download de todos os mods e validação dos arquivos instalados:
+Abra o launcher uma vez antes, para ele criar as pastas e você entrar na conta. Rodar o comando de novo repara a instalação e reaproveita o que já está certo.
 
-```sh
-npm run verify:live
-```
+### Por que um comando, e não um arquivo para baixar
 
-Essa verificação também usa pastas temporárias e remove os dados ao terminar. Ela confere arquivos e registros de instância; a autenticação e a execução real do jogo são feitas no launcher do jogador.
+Um programa baixado pelo navegador ganha a marca de “veio da internet”. Sem uma assinatura paga, o Windows mostra o SmartScreen e o macOS bloqueia pelo Gatekeeper, inclusive scripts `.bat` e `.command`. O que o terminal baixa não recebe essa marca. O comando baixa o instalador do seu sistema a partir de `channel/instalador.txt`, confere o SHA-256 publicado, executa e apaga o programa ao terminar.
+
+### Sem terminal
+
+Baixe o **[Astral.mrpack mais recente](https://github.com/dvd-iso/astral-installer/releases/latest)** e importe-o no Prism (**Adicionar instância → Importar**) ou no Modrinth App (arraste o arquivo para a janela).
+
+## Atualizações
+
+Ao abrir o jogo, o mod consulta o canal (`channel/stable.json`). Quando há uma versão nova, ela aparece na tela de título:
+
+1. **Atualizar agora** baixa o pack novo e cada mod alterado, conferindo tamanho e SHA-512. Mods que você já tem são reaproveitados.
+2. A atualização é instalada **quando o jogo fecha**. No Windows, os mods carregados ficam bloqueados enquanto o jogo está aberto. **Fechar o jogo** faz isso na hora.
+3. Abra o Minecraft de novo pelo launcher. Um aviso confirma a versão instalada.
+
+O que a atualização garante:
+
+- Só sai o que veio no pack e está intacto. Mods e arquivos que você adicionou ficam.
+- Configurações em `config/`, `options.txt` e `optionsof.txt` que você alterou ficam como estão.
+- Mundos, capturas, logs e dados do launcher nunca são tocados.
+- Sem internet, ou com o canal fora do ar, o jogo abre normalmente.
+- Um download corrompido é descartado sem mudar nada. Uma aplicação interrompida é retomada quando o jogo fechar de novo.
+
+Se a nova versão mudar o **Minecraft** ou exigir um **Fabric** mais novo, a troca é feita fora do jogo: a tela pede para rodar o comando de instalação de novo. Mundos e configurações ficam. No Modrinth App, use **Reinstalar modpack** com o `.mrpack` novo.
+
+Os arquivos ficam em `.astral/atualizacao/` dentro da pasta da instância, e `registro.log` mostra o que foi aplicado.
+
+O servidor Astral confere a versão na conexão. Quem estiver com um pack antigo recebe a versão necessária e entra depois de atualizar.
 
 ## Publicar uma versão do modpack
-
-O instalador acompanha **`channel/stable.json` na branch `main` deste repositório**. Uma atualização do pack não exige recompilar o aplicativo.
 
 ### Pelo navegador (recomendado)
 
 1. Abra **[astralmc.online/publicar-modpack.html](https://astralmc.online/publicar-modpack.html)**. A página abre o formulário de release do GitHub com uma tag nova já preenchida (`modpack-AAAAMMDD-HHMM`).
-2. Arraste o `.mrpack` para a área de anexos. Na descrição, escreva o que mudou: o texto aparece no aplicativo como novidades.
+2. Arraste o `.mrpack` exportado da sua instância para a área de anexos. Na descrição, escreva o que mudou: o texto aparece no jogo como novidades.
 3. Clique em **Publish release**.
 
-O workflow **Publicar modpack** baixa o arquivo anexado, valida o pack, testa a instalação em todos os launchers e publica o canal na `main`. Em poucos minutos o aplicativo mostra **Atualizar modpack**, e a página de instalação do site exibe as novas versões. Se algo falhar, o canal continua como estava e o GitHub avisa por e-mail; a aba **Actions** mostra o motivo. O workflow devolve o selo de release mais recente ao Astral Installer.
+O workflow **Publicar modpack** compila e testa o mod e limpa o pack. Ele embute o mod com a identidade da versão e a lista de arquivos, confere cada download e publica o canal na `main`. Em poucos minutos, quem abrir o jogo vê a atualização. A release passa a ser a **mais recente**, então o link de download acima sempre entrega o pack atual. Se algo falhar, o canal continua como estava, e a aba **Actions** mostra o motivo.
 
-Se a release `modpack-…` for publicada antes de anexar o arquivo, a automação aguarda por até 10 minutos e só processa o `.mrpack` depois que o upload terminar. Editar a release também inicia uma nova consulta aos anexos. Para um upload que terminar depois desse prazo, use **Run workflow** com a tag da release.
+Pode exportar a instância do jeito que está. Dados locais que vão junto no export (`.astral/`, `servers.dat`, `local/`, `downloads/`, logs, caches e os binários de ffmpeg e yt-dlp que o Dream Displays baixa sozinho em cada sistema) são removidos. O anexo é trocado pelo pack limpo, `Astral-<versão>.mrpack`.
 
-O workflow também compila o **Astral Modpack**, um pequeno mod Fabric, e o inclui em `overrides/mods/astral-modpack.jar`. O jar guarda a identificação do conteúdo do pack e responde à consulta do plugin Astral durante a configuração da conexão, antes da entrada no mundo. Funciona nos quatro launchers e na importação direta do `.mrpack`, inclusive com versões anteriores do instalador. A identificação muda quando os arquivos, as dependências ou a versão interna mudam, mesmo quando o exportador repete um número de versão. Reprocessar o mesmo pack não muda sua identidade.
-
-Pode exportar a instância do seu launcher como ela está. Dados locais que o export leva junto, como `.astral/`, `servers.dat`, `local/`, `downloads/`, logs e caches, são removidos do pack, e o anexo da release é trocado pelo pack limpo (`Astral-<versão>.mrpack`).
-
-Para reprocessar uma release já publicada, use **Actions → Publicar modpack → Run workflow** e informe a tag.
-
-Não apague releases de modpack: o canal baixa o pack do anexo da release publicada.
+Se a release for publicada antes de o anexo terminar de subir, a automação espera até 10 minutos. Para reprocessar uma release, use **Actions → Publicar modpack → Run workflow** e informe a tag. Não apague releases de modpack: o canal baixa o pack do anexo.
 
 ### Pela linha de comando
 
-1. Com **JDK 25 e Gradle 9.5**, compile o identificador e prepare o arquivo que será publicado:
+Com **JDK 25 e Gradle 9.5**:
 
-   ```sh
-   gradle -p modpack-guard build
-   npm run pack:prepare -- --pack /caminho/Astral.mrpack --output /caminho/Astral-publicar.mrpack
-   ```
+```sh
+gradle -p mod build
+npm run pack:prepare -- --pack /caminho/Astral.mrpack --output /caminho/Astral-publicar.mrpack
+npm run pack:publish -- --pack /caminho/Astral-publicar.mrpack --url https://…/Astral-2.5.mrpack --notes "Novidades"
+npm run verify:live
+```
 
-   O identificador está compilado para **Minecraft 26.3**. Ao mudar o Minecraft do pack, adapte e recompile `modpack-guard/`; a publicação recusa um jar de outra versão. O fluxo pelo GitHub continua fazendo essa preparação automaticamente.
+Publique o arquivo **preparado** na URL informada, com nome versionado, e faça commit/push de `channel/stable.json`.
 
-2. Publique o `.mrpack` **preparado** em uma URL HTTPS direta, com nome versionado, para conservar downloads antigos. Gere o canal a partir do **mesmo arquivo publicado**:
+O mod está compilado para **Minecraft 26.3**. Ao mudar o Minecraft do pack, adapte e recompile `mod/`. A publicação recusa um jar de outra versão.
 
-   ```sh
-   npm run pack:publish -- \
-      --pack /caminho/Astral-publicar.mrpack \
-     --url https://astralmc.online/downloads/Astral-2.1.mrpack \
-     --version 1.1.0 \
-     --name "Astral 2.1" \
-     --notes "Novos mods e melhorias no desempenho."
-   ```
+## Publicar uma versão do instalador
 
-3. Execute `npm run verify:live`, revise e faça commit/push de `channel/stable.json`.
+Em **Actions → Publicar instalador → Run workflow**, informe a versão (ex.: `1.0.0`). O workflow testa e compila o instalador para Windows, macOS e Linux (x64 e ARM), publica os binários na release `instalador-vX.Y.Z` sem marcá-la como mais recente e atualiza `channel/instalador.txt`. O próximo comando de instalação já usa a versão nova.
 
-O comando lê Minecraft e Fabric diretamente do manifesto, valida os caminhos do pack e calcula tamanho e SHA-512. A versão padrão é `versionId` do `.mrpack`; `--version` permite usar uma versão pública diferente. A detecção de mudanças usa o hash do pacote, inclusive quando um exportador repete o `versionId`.
+Os comandos curtos são servidos pelo site: `astralmc.online/instalar.sh` e `instalar.ps1` são cópias de [`instalar.sh`](instalar.sh) e [`instalar.ps1`](instalar.ps1). Eles só leem o manifesto, então mudam raramente. Ao alterar um deles, copie-o para o `astral-site`.
 
-O pack inicial chama-se **Astral 2.0**, mas seu `versionId` interno é **1.0.0**. Esses são os valores do arquivo já distribuído pelo site.
+## Como funciona
+
+```text
+instalar.sh, instalar.ps1   Comandos de instalação: baixam, conferem e abrem o instalador
+instalador/                 Instalador em Go com interface no terminal (Bubble Tea)
+mod/                        Mod Fabric "Astral Modpack": identidade na conexão (cookie astral:modpack) e atualizador
+lib/                        Leitura e validação do .mrpack, hashes, downloads e identidade (Node)
+scripts/                    Preparação e publicação do pack, compilação do instalador
+channel/                    stable.json (o pack atual) e instalador.txt (os binários do instalador)
+test/                       Testes da publicação (node --test); os do atualizador ficam em mod/src/test
+```
+
+- **Instalador:** lê `channel/stable.json`, baixa o pack e cada mod conferindo SHA-512 e só então grava na pasta do jogo. Segue as mesmas regras do atualizador do mod: só sai o que veio no pack e está intacto, e configurações alteradas ficam. Usa as mesmas pastas do antigo aplicativo, então reinstalar atualiza a instância existente.
+- **Identidade:** `pack:prepare` grava no jar `astral-modpack.txt` (o hash do conteúdo, enviado ao plugin na conexão) e `astral-pack.tsv` (o SHA-512 de cada arquivo da versão). O atualizador e o instalador usam a lista para saber o que é do pack.
+- **Atualizador:** a lógica (`mod/src/main/java/…/update/`) não depende do Minecraft. Ela baixa a versão nova para `.astral/atualizacao/` e grava `plano.tsv`. Quando o jogo fecha, um processo separado (`Applier`, rodando de uma cópia do jar só com o JDK) espera o jogo terminar e aplica o plano.
+- **Tela:** só widgets vanilla, sem Fabric API. Um mixin em `Gui.setScreen` coloca a tela de atualização por cima da tela de título, uma vez por sessão.
+
+```sh
+npm ci && npm run check && npm test     # publicação
+gradle -p mod build                     # mod e testes do atualizador
+cd instalador && go test ./...          # instalador
+```
+
+## O antigo Astral Installer
+
+O aplicativo Electron (versões 1.x, tags `vX.Y.Z`) foi aposentado: executáveis baixados pelo navegador sem assinatura sempre esbarram no SmartScreen e no Gatekeeper. O instalador de terminal faz o mesmo trabalho e usa as mesmas pastas. As releases antigas continuam disponíveis, e o canal segue compatível com elas. Quem tem um pack anterior ao Astral Modpack 2.0 precisa atualizar uma última vez: basta rodar o comando de instalação, que atualiza a instalação existente. Depois disso, o mod cuida das atualizações.
 
 ### Ativar o bloqueio de versões antigas no servidor
 
-1. Publique um `.mrpack` pelo workflow atualizado e aguarde a atualização de `channel/stable.json`. O campo `modpack` deve estar presente no canal.
-2. Instale a versão do plugin **Astral** que inclui `nucleo/modpack/` e reinicie o servidor. A verificação fica ligada por padrão, inclusive em configurações antigas.
-3. Quem usa um pack anterior, sem o identificador, recebe a mesma orientação de atualização. Após atualizar e reiniciar o jogo, pode entrar normalmente.
-
-O plugin consulta este mesmo canal a cada 60 segundos, guarda a última resposta válida em `plugins/Astral/modpack-canal.json` e aceita somente a identidade publicada. `modpack.ativado`, `modpack.canal`, os prazos e a mensagem ficam no `config.yml` do servidor. O bloqueio é uma recusa de conexão, sem banimento. Publique o pack identificado **antes** de ativar a verificação no servidor.
-
-## Gerar e publicar o aplicativo
-
-```sh
-npm run build       # Pacotes para o sistema atual
-npm run build:dir   # Pasta descompactada para validação
-```
-
-O workflow **Instalar, testar e empacotar** testa a lógica e carrega a interface em runners Windows, macOS e Linux. Gera Windows x64, macOS Intel/Apple Silicon e Linux x64/ARM64. Em pushes para `main` ou execução manual, os pacotes ficam nos artifacts da execução.
-
-Para publicar uma release, atualize `version` em `package.json` e `package-lock.json`, faça commit e envie uma tag `vX.Y.Z`. Depois que **todos os builds passarem**, o workflow publica os instaladores e `SHA256SUMS.txt` na release correspondente.
-
-Os builds iniciais são **sem assinatura de código**: certificados de Windows e credenciais Apple não estão configurados neste projeto. No macOS, o sistema pode exigir liberação em **Ajustes do Sistema → Privacidade e Segurança**. Para distribuição assinada, configure a assinatura/notarização do electron-builder com os certificados da equipe e GitHub Secrets; não os versione no repositório.
+O plugin **Astral** (`nucleo/modpack/`) consulta este canal a cada 60 segundos e aceita só a identidade publicada. `modpack.ativado`, `modpack.canal`, os prazos e a mensagem ficam no `config.yml` do servidor. O bloqueio é uma recusa de conexão, sem banimento.
 
 ## Licença
 
-Código do instalador sob MIT. Os mods mantêm suas próprias licenças e são baixados das origens declaradas no `.mrpack`. Minecraft e suas marcas pertencem à Mojang/Microsoft. Este projeto não é afiliado a elas.
+Código sob MIT. Os mods mantêm suas próprias licenças e são baixados das origens declaradas no `.mrpack`. Minecraft e suas marcas pertencem à Mojang/Microsoft. Este projeto não é afiliado a elas.

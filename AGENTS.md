@@ -1,10 +1,9 @@
 # Astral Installer
 
-- Aplicativo auxiliar do Minecraft Launcher oficial, SKlauncher 4, Prism Launcher e Modrinth App. Login, Java e inicialização do jogo pertencem ao launcher escolhido.
-- No Modrinth App, não escreva no banco interno (`app.db`): o schema muda a cada versão. O instalador só entrega o `.mrpack` verificado em `Downloads/Astral` e o abre no app; atualizações usam **Reinstalar modpack** na instância.
-- `src/core/` deve funcionar em Node sem Electron; as verificações usam `node --test` e servidores HTTP locais.
-- No launcher oficial, use a pasta exclusiva `astral/`. No SKlauncher e no Prism, use a instância própria `astral-installer`. Nunca use uma pasta compartilhada de jogo como diretório do modpack.
-- Atualizações só removem arquivos registrados pelo instalador. Preserve mundos, capturas, arquivos pessoais e configurações alteradas; mantenha backup e recuperação de transações interrompidas.
-- Use o `.mrpack` e os hashes publicados como fonte de verdade. Não redistribua Minecraft, Java, credenciais ou bibliotecas proprietárias.
-- `channel/stable.json` é o canal público do modpack. Normalmente ele é atualizado pelo workflow `modpack.yml`, quando uma release com um `.mrpack` anexado é publicada; `npm run pack:publish -- --help` explica a publicação manual.
-- Antes de publicar, execute `npm run check` e `npm test`. Os pacotes de cada sistema são gerados no GitHub Actions.
+- Instalação sem executável baixado pelo navegador: os comandos `instalar.sh` (`curl … | sh`) e `instalar.ps1` (`irm … | iex`) baixam o binário de `channel/instalador.txt`, conferem o SHA-256 e o executam no terminal. Nada baixado pelo terminal recebe a marca da internet, então não há SmartScreen nem Gatekeeper. Não reintroduza um instalador para baixar e dar duplo clique. O site serve cópias dos dois scripts: mantenha-os pequenos, estáveis e, no `.ps1`, com textos só em ASCII (o PowerShell 5 pode decodificar como Latin-1).
+- `instalador/` (Go, Bubble Tea + Lip Gloss) é a TUI. Usa as pastas e ids do antigo aplicativo Electron (instância `astral-installer`, perfil `astral-official`, `.minecraft/astral`) para atualizar instalações existentes. Tudo é baixado e conferido antes de mudar a pasta do jogo.
+- O mod `mod/` (Fabric, id `astral_modpack`) identifica o pack na conexão (cookie `astral:modpack`, lido pelo plugin Astral) e atualiza o pack pelo canal `channel/stable.json`. Mantenha o canal compatível com versões antigas: só acrescente campos.
+- A lógica do atualizador em `mod/src/main/java/online/astralmc/modpack/update/` não pode depender do Minecraft nem do Fabric: `Applier` roda num processo separado só com o JDK, depois que o jogo fecha. A interface usa apenas widgets vanilla, sem Fabric API.
+- Instalador e atualizador só removem arquivos listados em `astral-pack.tsv` (embutido no jar por `pack:prepare`) e intactos. Preserve mundos, arquivos do jogador e configurações alteradas. As regras de caminho existem em três lugares: `lib/files.cjs` + `lib/pack.cjs`, `PackPaths.java` e `instalador/paths.go`. Mude os três juntos.
+- Mudança de Minecraft ou Fabric não é feita pelo mod: o jogador roda o comando de instalação de novo.
+- Publicar o pack: release com tag `modpack-…` e o `.mrpack` anexado → `modpack.yml`. Publicar o instalador: `instalador.yml` (Run workflow com a versão). Antes, `npm run check`, `npm test`, `gradle -p mod build` (JDK 25, Gradle 9.5) e `go test ./...` em `instalador/`.

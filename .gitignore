@@ -1,8 +1,7 @@
 node_modules/
-dist/
-modpack-guard/.gradle/
-modpack-guard/build/
-modpack-guard/run/
+mod/.gradle/
+mod/build/
+mod/run/
 coverage/
 *.log
 .DS_Store
@@ -10,3 +9,4 @@ Thumbs.db
 .env
 .env.*
 !.env.example
+dist/

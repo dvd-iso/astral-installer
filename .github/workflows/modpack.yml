@@ -1,7 +1,7 @@
 name: Publicar modpack
 
 # Publicar uma release de modpack atualiza o canal, mesmo quando o anexo chega depois.
-# As releases do aplicativo (tags vX.Y.Z) não têm .mrpack e são ignoradas aqui.
+# Releases sem .mrpack (como as do antigo aplicativo, tags vX.Y.Z) são ignoradas aqui.
 on:
   release:
     types: [published, edited]
@@ -32,7 +32,7 @@ jobs:
         with:
           node-version: 24
           cache: npm
-      - run: npm ci --omit=dev
+      - run: npm ci
       - run: npm run check && npm test
       - uses: actions/setup-java@v4
         with:
@@ -41,13 +41,13 @@ jobs:
       - uses: gradle/actions/setup-gradle@v4
         with:
           gradle-version: 9.5.0
-      - name: Compilar o identificador do modpack
-        run: gradle -p modpack-guard build --no-daemon
+      - name: Compilar e testar o Astral Modpack
+        run: gradle -p mod build --no-daemon
       - name: Limpar e validar o .mrpack e gerar o canal
         env:
           GH_TOKEN: ${{ github.token }}
         run: node scripts/publish-release-pack.cjs
-      - name: Testar a instalação nos quatro launchers
+      - name: Conferir o pack e todos os downloads
         run: npm run verify:live
       - name: Publicar o canal de atualização
         run: |
@@ -57,13 +57,3 @@ jobs:
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git commit -m "Modpack: $(node -p 'require("./channel/stable.json").name')"
           git push origin HEAD:main
-      # O GitHub marca a release nova como a mais recente; o link "baixar a versão mais recente"
-      # do site e do aplicativo deve continuar apontando para o Astral Installer.
-      - name: Manter o aplicativo como release mais recente
-        if: always()
-        env:
-          GH_TOKEN: ${{ github.token }}
-          GH_REPO: ${{ github.repository }}
-        run: |
-          tag=$(gh release list --limit 100 --json tagName --jq '.[].tagName' | grep -E '^v[0-9]+\.[0-9]+\.[0-9]+$' | sort -V | tail -1)
-          if [ -n "$tag" ]; then gh release edit "$tag" --latest; fi

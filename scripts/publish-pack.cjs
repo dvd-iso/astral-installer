@@ -1,9 +1,9 @@
 const fs = require("node:fs/promises");
 const path = require("node:path");
 const { parseArgs } = require("node:util");
-const { readPack, validateChannel } = require("../src/core/pack.cjs");
-const { hashFile, atomicWrite, jsonBytes } = require("../src/core/files.cjs");
-const { packIdentity } = require("../src/core/modpack-identity.cjs");
+const { readPack, validateChannel } = require("../lib/pack.cjs");
+const { hashFile, atomicWrite, jsonBytes } = require("../lib/files.cjs");
+const { packIdentity } = require("../lib/modpack-identity.cjs");
 
 // Gera o canal a partir do mesmo arquivo publicado na URL informada.
 async function buildChannel(packFile, { url: packUrl, version, name, notes } = {}) {
