@@ -7,9 +7,6 @@ saida=$2
 base=$3
 raiz=$(cd "$(dirname "$0")/.." && pwd)
 mkdir -p "$saida"
-saida=$(cd "$saida" && pwd)
-manifesto="$saida/instalador.txt"
-printf '1\t%s\n' "$versao" >"$manifesto"
 # Nome, versão, ícone e manifesto no .exe (instalador/winres): um executável sem nada disso pesa contra ele
 # na análise do Windows Defender. O go build inclui os .syso só ao compilar para o Windows.
 trap 'rm -f "$raiz"/instalador/rsrc_windows_*.syso' EXIT
@@ -21,8 +18,6 @@ for alvo in windows-amd64 windows-arm64 darwin-amd64 darwin-arm64 linux-amd64 li
 	nome="astral-instalador-$alvo"
 	[ "$sistema" = windows ] && nome="$nome.exe"
 	(cd "$raiz/instalador" && CGO_ENABLED=0 GOOS=$sistema GOARCH=$arquitetura \
-		go build -trimpath -ldflags "-s -w -X main.version=$versao" -o "$saida/$nome" .)
-	soma=$(sha256sum "$saida/$nome" | cut -d ' ' -f 1)
-	printf '%s\t%s\t%s/%s\n' "$alvo" "$soma" "$base" "$nome" >>"$manifesto"
+		go build -trimpath -ldflags "-s -w -X main.version=$versao" -o "$(cd "$saida" && pwd)/$nome" .)
 done
-cat "$manifesto"
+sh "$raiz/scripts/manifesto-instalador.sh" "$versao" "$saida" "$base"

@@ -7,3 +7,5 @@
 - Instalador e atualizador só removem arquivos listados em `astral-pack.tsv` (embutido no jar por `pack:prepare`) e intactos. Preserve mundos, arquivos do jogador e configurações alteradas. As regras de caminho existem em três lugares: `lib/files.cjs` + `lib/pack.cjs`, `PackPaths.java` e `instalador/paths.go`. Mude os três juntos.
 - Mudança de Minecraft ou Fabric não é feita pelo mod: o jogador roda o comando de instalação de novo.
 - Publicar o pack: release com tag `modpack-…` e o `.mrpack` anexado → `modpack.yml`. Publicar o instalador: `instalador.yml` (Run workflow com a versão). Antes, `npm run check`, `npm test`, `gradle -p mod build` (JDK 25, Gradle 9.5) e `go test ./...` em `instalador/`.
+- Os `.exe` são assinados pelo SignPath Foundation em `instalador.yml` quando o segredo `SIGNPATH_API_TOKEN` existe. O manifesto é recalculado depois de assinar, e nada é publicado se o Defender acusar. Mantenha no README o parágrafo "Code signing policy" e mantenha `PRIVACY.md` em dia com toda conexão nova do instalador ou do mod: os dois são exigências do SignPath.
+- O README é para o jogador. Detalhes de launchers, desenvolvimento e publicação ficam em `docs/`.

@@ -1,7 +1,8 @@
 name: Publicar instalador
 
-# Compila o instalador (instalador/) para Windows, macOS e Linux, publica os binários numa release
-# instalador-vX.Y.Z e atualiza channel/instalador.txt, que os comandos instalar.sh e instalar.ps1 leem.
+# Compila o instalador (instalador/) para Windows, macOS e Linux, assina os .exe pelo SignPath quando o segredo
+# existe, confere os .exe com o Windows Defender, publica os binários numa release instalador-vX.Y.Z e atualiza
+# channel/instalador.txt, que os comandos instalar.sh e instalar.ps1 leem.
 on:
   workflow_dispatch:
     inputs:
@@ -11,15 +12,20 @@ on:
 
 permissions:
   contents: write
+  actions: read
 
 concurrency:
   group: instalador
   cancel-in-progress: false
 
 jobs:
-  publicar:
-    name: Instalador ${{ inputs.versao }}
+  compilar:
+    name: Compilar ${{ inputs.versao }}
     runs-on: ubuntu-24.04
+    env:
+      VERSAO: ${{ inputs.versao }}
+      BASE: https://github.com/${{ github.repository }}/releases/download/instalador-v${{ inputs.versao }}
+      ASSINAR: ${{ secrets.SIGNPATH_API_TOKEN != '' }}
     steps:
       - uses: actions/checkout@v4
         with:
@@ -30,7 +36,6 @@ jobs:
           cache-dependency-path: instalador/go.sum
       - name: Conferir a versão
         env:
-          VERSAO: ${{ inputs.versao }}
           GH_TOKEN: ${{ github.token }}
         run: |
           echo "$VERSAO" | grep -Eq '^[0-9]+\.[0-9]+\.[0-9]+$' || { echo "Use o formato 1.2.3."; exit 1; }
@@ -39,14 +44,96 @@ jobs:
         working-directory: instalador
         run: go vet ./... && go test ./...
       - name: Compilar
+        run: sh scripts/build-instalador.sh "$VERSAO" dist "$BASE"
+      - name: Guardar os .exe sem assinatura
+        id: sem-assinatura
+        if: env.ASSINAR == 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: windows-sem-assinatura
+          if-no-files-found: error
+          path: dist/*.exe
+          retention-days: 1
+      # A política de assinatura pode pedir aprovação do mantenedor no SignPath; o workflow espera até 1 hora.
+      - name: Assinar pelo SignPath Foundation
+        if: env.ASSINAR == 'true'
+        uses: signpath/github-action-submit-signing-request@v1
+        with:
+          api-token: ${{ secrets.SIGNPATH_API_TOKEN }}
+          organization-id: ${{ vars.SIGNPATH_ORGANIZATION_ID }}
+          project-slug: ${{ vars.SIGNPATH_PROJECT_SLUG || 'astral-installer' }}
+          signing-policy-slug: ${{ vars.SIGNPATH_SIGNING_POLICY || 'release-signing' }}
+          artifact-configuration-slug: ${{ vars.SIGNPATH_ARTIFACT_CONFIGURATION }}
+          github-artifact-id: ${{ steps.sem-assinatura.outputs.artifact-id }}
+          wait-for-completion: true
+          wait-for-completion-timeout-in-seconds: 3600
+          output-artifact-directory: assinado
+      - name: Usar os .exe assinados
+        if: env.ASSINAR == 'true'
+        run: |
+          for exe in dist/*.exe; do
+            nome=$(basename "$exe")
+            [ -f "assinado/$nome" ] || { echo "O SignPath não devolveu $nome."; exit 1; }
+            cp "assinado/$nome" "$exe"
+          done
+          sh scripts/manifesto-instalador.sh "$VERSAO" dist "$BASE"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: instalador
+          path: dist/
+          retention-days: 7
+
+  verificar:
+    name: Conferir no Windows
+    needs: compilar
+    runs-on: windows-2025
+    env:
+      ASSINAR: ${{ secrets.SIGNPATH_API_TOKEN != '' }}
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: instalador
+          path: dist
+      - name: Metadados e assinatura
         env:
           VERSAO: ${{ inputs.versao }}
-        run: sh scripts/build-instalador.sh "$VERSAO" dist "https://github.com/${{ github.repository }}/releases/download/instalador-v$VERSAO"
+        run: |
+          foreach ($exe in Get-ChildItem dist\*.exe) {
+            $info = $exe.VersionInfo
+            if ($info.ProductName -ne 'Astral' -or $info.FileVersion -ne "$env:VERSAO.0") { throw "$($exe.Name) saiu sem os metadados." }
+            $assinatura = Get-AuthenticodeSignature $exe.FullName
+            "$($exe.Name): assinatura $($assinatura.Status) $($assinatura.SignerCertificate.Subject)"
+            if ($env:ASSINAR -eq 'true' -and $assinatura.Status -ne 'Valid') { throw "$($exe.Name) não está assinado." }
+          }
+          $saida = & dist\astral-instalador-windows-amd64.exe --versao
+          if ($saida -ne "Astral Instalador $env:VERSAO") { throw "Saída inesperada: $saida" }
+      - name: Windows Defender
+        run: |
+          Update-MpSignature
+          Get-MpComputerStatus | Format-List AMProductVersion, AntivirusSignatureVersion, AntivirusSignatureLastUpdated
+          $mp = Join-Path $env:ProgramFiles 'Windows Defender\MpCmdRun.exe'
+          foreach ($exe in Get-ChildItem dist\*.exe) {
+            & $mp -Scan -ScanType 3 -File $exe.FullName -DisableRemediation
+            if ($LASTEXITCODE -ne 0) { Get-MpThreatDetection | Format-List; throw "O Defender acusou $($exe.Name) ($LASTEXITCODE)." }
+          }
+
+  publicar:
+    name: Publicar ${{ inputs.versao }}
+    needs: verificar
+    runs-on: ubuntu-24.04
+    env:
+      VERSAO: ${{ inputs.versao }}
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+      - uses: actions/download-artifact@v4
+        with:
+          name: instalador
+          path: dist
+      # --latest=false: o link "mais recente" do repositório continua entregando o modpack.
       - name: Publicar a release
-        env:
-          VERSAO: ${{ inputs.versao }}
-          GH_TOKEN: ${{ github.token }}
-        # --latest=false: o link "mais recente" do repositório continua entregando o modpack.
         run: |
           gh release create "instalador-v$VERSAO" dist/astral-instalador-* --target main --latest=false \
             --title "Instalador $VERSAO" \
@@ -57,5 +144,5 @@ jobs:
           git add channel/instalador.txt
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git commit -m "Instalador ${{ inputs.versao }}"
+          git commit -m "Instalador $VERSAO"
           git push origin HEAD:main
