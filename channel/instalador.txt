@@ -1,0 +1,7 @@
+1	1.0.0
+windows-amd64	1661b218a46c770f71457588d21bd65ace81061b997dea02146bbf93fbc317e8	https://github.com/dvd-iso/astral-installer/releases/download/instalador-v1.0.0/astral-instalador-windows-amd64.exe
+windows-arm64	d385027c70e24f406861bf82b387dc5167ef592a61b6284c8046c86922c51d1c	https://github.com/dvd-iso/astral-installer/releases/download/instalador-v1.0.0/astral-instalador-windows-arm64.exe
+darwin-amd64	8d46050afcaba0652186d7d62563794c3d209e0bb78e445d74a61715f4835d1a	https://github.com/dvd-iso/astral-installer/releases/download/instalador-v1.0.0/astral-instalador-darwin-amd64
+darwin-arm64	de8d8c8d6670ff750094983d32c405b4d42da41c602dbede3251d9293b78c895	https://github.com/dvd-iso/astral-installer/releases/download/instalador-v1.0.0/astral-instalador-darwin-arm64
+linux-amd64	c250a7ff63eb9e02024a069bce8a79a346a79eebcdc2cbfab980d62dd7696248	https://github.com/dvd-iso/astral-installer/releases/download/instalador-v1.0.0/astral-instalador-linux-amd64
+linux-arm64	5c707ec802306cc507d38f2f20d66514fdfaf87bdb5d21bb7d309a36da1688af	https://github.com/dvd-iso/astral-installer/releases/download/instalador-v1.0.0/astral-instalador-linux-arm64
