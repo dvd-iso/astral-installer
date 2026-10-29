@@ -86,7 +86,7 @@ jobs:
   verificar:
     name: Conferir no Windows
     needs: compilar
-    runs-on: windows-2025
+    runs-on: windows-2022
     env:
       ASSINAR: ${{ secrets.SIGNPATH_API_TOKEN != '' }}
     steps:
@@ -109,8 +109,10 @@ jobs:
           if ($saida -ne "Astral Instalador $env:VERSAO") { throw "Saída inesperada: $saida" }
       - name: Windows Defender
         run: |
+          Get-Service WinDefend | Format-List Status, StartType
+          if ((Get-Service WinDefend).Status -ne 'Running') { Start-Service WinDefend }
           Update-MpSignature
-          Get-MpComputerStatus | Format-List AMProductVersion, AntivirusSignatureVersion, AntivirusSignatureLastUpdated
+          Get-MpComputerStatus | Format-List AMServiceEnabled, AntivirusEnabled, AMProductVersion, AntivirusSignatureVersion, AntivirusSignatureLastUpdated
           $mp = Join-Path $env:ProgramFiles 'Windows Defender\MpCmdRun.exe'
           foreach ($exe in Get-ChildItem dist\*.exe) {
             & $mp -Scan -ScanType 3 -File $exe.FullName -DisableRemediation

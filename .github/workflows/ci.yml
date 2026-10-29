@@ -62,7 +62,7 @@ jobs:
   instalador-windows:
     name: Instalador · Windows
     needs: instalador
-    runs-on: windows-2025
+    runs-on: windows-2022
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-go@v5
@@ -89,8 +89,10 @@ jobs:
       # mas pega o falso positivo mais comum em programas Go.
       - name: Windows Defender
         run: |
+          Get-Service WinDefend | Format-List Status, StartType
+          if ((Get-Service WinDefend).Status -ne 'Running') { Start-Service WinDefend }
           Update-MpSignature
-          Get-MpComputerStatus | Format-List AMProductVersion, AntivirusSignatureVersion, AntivirusSignatureLastUpdated
+          Get-MpComputerStatus | Format-List AMServiceEnabled, AntivirusEnabled, AMProductVersion, AntivirusSignatureVersion, AntivirusSignatureLastUpdated
           $mp = Join-Path $env:ProgramFiles 'Windows Defender\MpCmdRun.exe'
           foreach ($exe in Get-ChildItem dist\*.exe) {
             & $mp -Scan -ScanType 3 -File $exe.FullName -DisableRemediation
