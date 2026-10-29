@@ -58,7 +58,7 @@ async function main() {
     pack: { type: "string" }, output: { type: "string" }, guard: { type: "string" }, help: { type: "boolean" },
   } });
   if (values.help) {
-    console.log("npm run pack:prepare -- --pack Astral.mrpack --output Astral-publicar.mrpack [--guard mod/build/libs/astral-modpack-2.0.0.jar]\nCompile o mod com Gradle 9.5 e JDK 25: gradle -p mod build. Publique o arquivo preparado.");
+    console.log("npm run pack:prepare -- --pack Astral.mrpack --output Astral-publicar.mrpack [--guard mod/build/libs/astral-modpack-2.1.0.jar]\nCompile o mod com Gradle 9.5 e JDK 25: gradle -p mod build. Publique o arquivo preparado.");
     return;
   }
   if (!values.pack || !values.output) throw new Error("Informe --pack e --output. Use --help para ver um exemplo.");

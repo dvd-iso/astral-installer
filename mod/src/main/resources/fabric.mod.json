@@ -3,7 +3,7 @@
   "id": "astral_modpack",
   "version": "${version}",
   "name": "Astral Modpack",
-  "description": "Identifica a versão do modpack na conexão com o servidor Astral e mantém o pack atualizado.",
+  "description": "Identifica a versão do modpack na conexão com o servidor Astral, mantém o pack atualizado e, com a Interface da Astral, deixa claros os rótulos das telas sobre os painéis escuros.",
   "environment": "client",
   "license": "MIT",
   "contact": { "homepage": "https://astralmc.online", "sources": "https://github.com/dvd-iso/astral-installer" },
