@@ -6,16 +6,16 @@
   "minecraftVersion": "26.3",
   "fabricLoader": "0.19.5",
   "minimumInstallerVersion": "1.0.0",
-  "publishedAt": "2026-10-30T08:38:06.462Z",
-  "releaseNotes": "Além de dar uma tratada nas animações e na identidade visual, fizemos algumas otimizações e correções de bugs",
+  "publishedAt": "2026-10-30T23:16:36.085Z",
+  "releaseNotes": "",
   "pack": {
-    "url": "https://github.com/dvd-iso/astral-installer/releases/download/modpack-20261030-0537/Astral-2.6.mrpack?sha512=d0cc3c0220732e08",
-    "size": 11641316,
-    "sha512": "d0cc3c0220732e08b07564540cb76017ab73eb0b98e1b08f8519a82351477a2aa8be20100a981e21b37ea436fa1f2ad15c71884d392ddba19ace6c38d923600d"
+    "url": "https://github.com/dvd-iso/astral-installer/releases/download/modpack-20261030-2015/Astral-2.6.mrpack?sha512=55c3d701f58a19ec",
+    "size": 11634562,
+    "sha512": "55c3d701f58a19ec59263d31e0fb04fcf1c4777b9ffe513d961337bb2cff9073b0aecded01477f8dc19d36e7e8649bba12c1378e3221bb16f15bc75060756aaf"
   },
   "modpack": {
     "protocolVersion": 1,
-    "contentSha256": "1dc10044949bb047366646cba8fb37e07a8e942e9dc836beb199ffa3561f787f",
+    "contentSha256": "004745b7a9986ca1722d22043383f762fe5188124a678ad47bc5ef918e170c43",
     "version": "2.6"
   }
 }
