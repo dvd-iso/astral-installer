@@ -64,12 +64,13 @@ test("preparar um export real remove dados locais da cópia sem alterar o origin
   f.zip.addFile("overrides/dreamdisplays/ffmpeg/linux-x64/ffmpeg", Buffer.from("binário de Linux"));
   f.zip.addFile("overrides/dreamdisplays/native/linux-x64/libavcodec.so", Buffer.from("biblioteca de Linux"));
   f.zip.addFile("overrides/libs/yt-dlp/yt-dlp", Buffer.from("yt-dlp"));
+  f.zip.addFile("overrides/player_models/nihilus.cpmmodel", Buffer.from("modelo da equipe"));
   f.zip.writeZip(f.source);
   const before = await hashFile(f.source);
   const { removed } = await preparePack(f.source, f.destination, f);
-  assert.equal(removed.length, 5);
+  assert.equal(removed.length, 6);
   assert.equal(await hashFile(f.source), before);
-  assert(!readPack(f.destination).files.some((file) => /^(?:\.astral|dreamdisplays|libs)\//.test(file.path) || file.path === "servers.dat"));
+  assert(!readPack(f.destination).files.some((file) => /^(?:\.astral|dreamdisplays|libs|player_models)\//.test(file.path) || file.path === "servers.dat"));
   assert(packIdentity(readPack(f.destination)));
 });
 
