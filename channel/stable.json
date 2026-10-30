@@ -1,21 +1,21 @@
 {
   "schemaVersion": 1,
   "id": "astral",
-  "name": "Astral-2.4",
-  "version": "2.4",
+  "name": "Astral-Look-and-Feel",
+  "version": "2.5",
   "minecraftVersion": "26.3",
   "fabricLoader": "0.19.5",
   "minimumInstallerVersion": "1.0.0",
-  "publishedAt": "2026-10-26T16:33:06.770Z",
-  "releaseNotes": "Finalmente podemos anunciar nossa primeira versão estavel :)",
+  "publishedAt": "2026-10-30T00:19:19.684Z",
+  "releaseNotes": "Dando uma pequena decorada e fazendo pequenos ajustes ;)",
   "pack": {
-    "url": "https://github.com/dvd-iso/astral-installer/releases/download/modpack-20261026-1322/Astral-2.4.mrpack?sha512=5f2befeea08be1d8",
-    "size": 199432462,
-    "sha512": "5f2befeea08be1d8eccd7b944a4a9e302aac1fae9c1439333f48e484f1fbd9b2a488b8885b39d9c0b2e7c0644ec305addb469f3091a47b5baee2138df28eebb7"
+    "url": "https://github.com/dvd-iso/astral-installer/releases/download/modpack-20261029-2034/Astral-2.5.mrpack?sha512=11618b6a9740c796",
+    "size": 11613437,
+    "sha512": "11618b6a9740c796ee33a155c6eb0eb3392e83125fd61af0b69c28e8a6f4ee19c396efee03b7dd7d077eb28e4da564d70b0715a052926c8505983a18ffc45d96"
   },
   "modpack": {
     "protocolVersion": 1,
-    "contentSha256": "6a3a2bbd7708878c2b5d23e01f6a79c90ded2d5c6db138c774138782960d434b",
-    "version": "2.4"
+    "contentSha256": "805871b1b056af9fade536d2b5bc8a1efe9d884fcb61ad3acdf1d3038991ceb3",
+    "version": "2.5"
   }
 }
