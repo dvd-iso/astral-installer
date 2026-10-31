@@ -1,21 +1,21 @@
 {
   "schemaVersion": 1,
   "id": "astral",
-  "name": "Astral-Look-and-Feel",
-  "version": "2.6",
+  "name": "Astral-Show-my-lights",
+  "version": "2.7",
   "minecraftVersion": "26.3",
   "fabricLoader": "0.19.5",
   "minimumInstallerVersion": "1.0.0",
-  "publishedAt": "2026-10-30T23:16:36.085Z",
-  "releaseNotes": "",
+  "publishedAt": "2026-10-31T03:09:13.592Z",
+  "releaseNotes": "Agora os players podem exibir suas skins livremente sem armaduras atrapalhando",
   "pack": {
-    "url": "https://github.com/dvd-iso/astral-installer/releases/download/modpack-20261030-2015/Astral-2.6.mrpack?sha512=55c3d701f58a19ec",
-    "size": 11634562,
-    "sha512": "55c3d701f58a19ec59263d31e0fb04fcf1c4777b9ffe513d961337bb2cff9073b0aecded01477f8dc19d36e7e8649bba12c1378e3221bb16f15bc75060756aaf"
+    "url": "https://github.com/dvd-iso/astral-installer/releases/download/modpack-20261031-0008/Astral-2.7.mrpack?sha512=df8a7abeb555d3e1",
+    "size": 11642881,
+    "sha512": "df8a7abeb555d3e1b3b61561a174f368e30fe38476f05df0bd79ce20914d41a756bd0d6c862544fc7badc912b953d57dd5f02d8916348b2074febea1e2bc2b23"
   },
   "modpack": {
     "protocolVersion": 1,
-    "contentSha256": "004745b7a9986ca1722d22043383f762fe5188124a678ad47bc5ef918e170c43",
-    "version": "2.6"
+    "contentSha256": "9fd6a3155ae6974382a021ba1d87c26f61c25ce223677b59e2f44970ce7fd447",
+    "version": "2.7"
   }
 }
