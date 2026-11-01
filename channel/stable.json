@@ -1,21 +1,21 @@
 {
   "schemaVersion": 1,
   "id": "astral",
-  "name": "Astral-Show-my-lights",
-  "version": "2.7",
+  "name": "Astral-Stable-Release",
+  "version": "2.8",
   "minecraftVersion": "26.3",
   "fabricLoader": "0.19.5",
   "minimumInstallerVersion": "1.0.0",
-  "publishedAt": "2026-10-31T03:09:13.592Z",
-  "releaseNotes": "Agora os players podem exibir suas skins livremente sem armaduras atrapalhando",
+  "publishedAt": "2026-11-01T05:35:34.680Z",
+  "releaseNotes": "Um update surpresa pra deixar o server bem redondinho e preparados pra todos :) obrigado a todos pelo Astral ser oque é.",
   "pack": {
-    "url": "https://github.com/dvd-iso/astral-installer/releases/download/modpack-20261031-0008/Astral-2.7.mrpack?sha512=df8a7abeb555d3e1",
-    "size": 11642881,
-    "sha512": "df8a7abeb555d3e1b3b61561a174f368e30fe38476f05df0bd79ce20914d41a756bd0d6c862544fc7badc912b953d57dd5f02d8916348b2074febea1e2bc2b23"
+    "url": "https://github.com/dvd-iso/astral-installer/releases/download/modpack-20261101-0234/Astral-2.8.mrpack?sha512=eef2294447c94c69",
+    "size": 13929093,
+    "sha512": "eef2294447c94c69d7f4916edf0f90ac2aa89ffbd9231f3ed3d1cf98b81ec4c703a4388a41a74d05ddfa6d8ab89e58bee78ce87d45aa95b86eeb8b43eed8fff4"
   },
   "modpack": {
     "protocolVersion": 1,
-    "contentSha256": "9fd6a3155ae6974382a021ba1d87c26f61c25ce223677b59e2f44970ce7fd447",
-    "version": "2.7"
+    "contentSha256": "93edf2d392fd4ce98cae8f8facd37161b0dbbeb6a755758679e2249a9c7f4fdd",
+    "version": "2.8"
   }
 }
