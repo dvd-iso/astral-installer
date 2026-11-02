@@ -1,21 +1,21 @@
 {
   "schemaVersion": 1,
   "id": "astral",
-  "name": "Astral-Stable-Release",
-  "version": "2.8",
+  "name": "Astral",
+  "version": "2.9",
   "minecraftVersion": "26.3",
   "fabricLoader": "0.19.5",
   "minimumInstallerVersion": "1.0.0",
-  "publishedAt": "2026-11-01T05:35:34.680Z",
-  "releaseNotes": "Um update surpresa pra deixar o server bem redondinho e preparados pra todos :) obrigado a todos pelo Astral ser oque é.",
+  "publishedAt": "2026-11-02T18:58:18.475Z",
+  "releaseNotes": "Dando aquela otimizada na performace e deixando o client mais bonitinho tbm",
   "pack": {
-    "url": "https://github.com/dvd-iso/astral-installer/releases/download/modpack-20261101-0234/Astral-2.8.mrpack?sha512=eef2294447c94c69",
-    "size": 13929093,
-    "sha512": "eef2294447c94c69d7f4916edf0f90ac2aa89ffbd9231f3ed3d1cf98b81ec4c703a4388a41a74d05ddfa6d8ab89e58bee78ce87d45aa95b86eeb8b43eed8fff4"
+    "url": "https://github.com/dvd-iso/astral-installer/releases/download/modpack-20261102-1557/Astral-2.9.mrpack?sha512=99c4e3104a3fca57",
+    "size": 18479358,
+    "sha512": "99c4e3104a3fca578b22b2c55c604cb360bdd31a6a12a56abe189068ad32ade36aed0c2a8e9571cf54f6c30de8ad9a0c84322dad952c9e7c5a5bfdf7d0afd833"
   },
   "modpack": {
     "protocolVersion": 1,
-    "contentSha256": "93edf2d392fd4ce98cae8f8facd37161b0dbbeb6a755758679e2249a9c7f4fdd",
-    "version": "2.8"
+    "contentSha256": "887ccc2285cfb655fdec204d0da4c761def0549f83cda3c3cb5486b17a9230fd",
+    "version": "2.9"
   }
 }
