@@ -3,16 +3,57 @@ plugins {
 }
 
 group = 'online.astralmc'
-version = '2.1.0'
+version = '2.2.2'
 base { archivesName = 'astral-modpack' }
 
 repositories { mavenCentral() }
+
+// Fixture de teste, nunca incluída no jar do Astral. Versão e hash publicados pelo Modrinth.
+def puzzleFixture = layout.buildDirectory.file('test-fixtures/puzzle-fabric-2.3.1+26.3.jar')
+def puzzleHash = '677ee8736eb6a00e3e8ac2b4e60e5771d3c6ca3e44f73b099b78cfef22b5ffc3b851ef931f902d8a668648cb6261ee1c531d8a607e2603e81230c3e132dc3fb8'
+def sha512 = { File file ->
+    def digest = java.security.MessageDigest.getInstance('SHA-512')
+    file.withInputStream { input ->
+        byte[] buffer = new byte[65536]
+        for (int count; (count = input.read(buffer)) != -1;) digest.update(buffer, 0, count)
+    }
+    java.util.HexFormat.of().formatHex(digest.digest())
+}
+def preparePuzzleCompatibility = tasks.register('preparePuzzleCompatibility') {
+    description = 'Obtém Puzzle 2.3.1 do Modrinth e confere o SHA-512 fixado para o teste de prioridade.'
+    outputs.file(puzzleFixture)
+    outputs.upToDateWhen {
+        def file = puzzleFixture.get().asFile
+        file.isFile() && sha512(file) == puzzleHash
+    }
+    doLast {
+        def file = puzzleFixture.get().asFile
+        if (file.isFile() && sha512(file) == puzzleHash) return
+        if (gradle.startParameter.offline) {
+            throw new GradleException('Fixture Puzzle ausente/corrompida. Rode preparePuzzleCompatibility com rede antes de usar --offline; compatibilidade não será ignorada.')
+        }
+        file.parentFile.mkdirs()
+        def temporary = new File(file.parentFile, file.name + '.part')
+        try {
+            def connection = URI.create('https://cdn.modrinth.com/data/3IuO68q1/versions/zLgrUpvu/puzzle-fabric-2.3.1%2B26.3.jar').toURL().openConnection()
+            connection.connectTimeout = 30000
+            connection.readTimeout = 30000
+            connection.setRequestProperty('User-Agent', 'Astral-Modpack-Compatibility-Test/2.2.2')
+            connection.inputStream.withCloseable { input ->
+                temporary.withOutputStream { output -> input.transferTo(output) }
+            }
+            if (sha512(temporary) != puzzleHash) throw new GradleException('SHA-512 do Puzzle difere do hash fixado do Modrinth; teste recusado.')
+            java.nio.file.Files.move(temporary.toPath(), file.toPath(), java.nio.file.StandardCopyOption.REPLACE_EXISTING)
+        } finally { temporary.delete() }
+    }
+}
 
 dependencies {
     minecraft 'com.mojang:minecraft:26.3'
     implementation 'net.fabricmc:fabric-loader:0.19.5'
     testImplementation 'org.junit.jupiter:junit-jupiter:5.11.4'
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher:1.11.4'
+    testRuntimeOnly files(puzzleFixture).builtBy(preparePuzzleCompatibility)
 }
 
 java { toolchain.languageVersion = JavaLanguageVersion.of(25) }
@@ -28,5 +69,9 @@ processResources {
     inputs.property 'version', project.version
     filesMatching('fabric.mod.json') { expand version: project.version }
 }
-test { useJUnitPlatform() }
+test {
+    useJUnitPlatform()
+    dependsOn preparePuzzleCompatibility
+    systemProperty 'astral.compatMixins', 'puzzle-splashscreen.mixins.json'
+}
 jar { from('../LICENSE') }
