@@ -6,16 +6,16 @@
   "minecraftVersion": "26.3",
   "fabricLoader": "0.19.5",
   "minimumInstallerVersion": "1.0.0",
-  "publishedAt": "2026-11-02T18:58:18.475Z",
+  "publishedAt": "2026-11-02T19:12:37.392Z",
   "releaseNotes": "Dando aquela otimizada na performace e deixando o client mais bonitinho tbm",
   "pack": {
-    "url": "https://github.com/dvd-iso/astral-installer/releases/download/modpack-20261102-1557/Astral-2.9.mrpack?sha512=99c4e3104a3fca57",
-    "size": 18479358,
-    "sha512": "99c4e3104a3fca578b22b2c55c604cb360bdd31a6a12a56abe189068ad32ade36aed0c2a8e9571cf54f6c30de8ad9a0c84322dad952c9e7c5a5bfdf7d0afd833"
+    "url": "https://github.com/dvd-iso/astral-installer/releases/download/modpack-20261102-1557/Astral-2.9.mrpack?sha512=d597c892e558efe6",
+    "size": 18783940,
+    "sha512": "d597c892e558efe604dbad37fd558661b1ff693249e07c29cd214527fcdf5e3f3ec19b6e1b116ea799527de9f6a9a6bf86e7ebb07b8da1607e0555e2423cf4db"
   },
   "modpack": {
     "protocolVersion": 1,
-    "contentSha256": "887ccc2285cfb655fdec204d0da4c761def0549f83cda3c3cb5486b17a9230fd",
+    "contentSha256": "70607aaf1e3abd3257db79657185363dc4909b1e6b418b62b79f635532b1ba92",
     "version": "2.9"
   }
 }
