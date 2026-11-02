@@ -91,7 +91,8 @@ jobs:
         run: |
           Get-Service WinDefend | Format-List Status, StartType
           if ((Get-Service WinDefend).Status -ne 'Running') { Start-Service WinDefend }
-          Update-MpSignature
+          # O runner às vezes não consegue baixar as assinaturas novas (RPC failed); a varredura segue com as que ele já tem.
+          try { Update-MpSignature -ErrorAction Stop } catch { Write-Warning "Assinaturas do Defender não atualizadas: $_" }
           Get-MpComputerStatus | Format-List AMServiceEnabled, AntivirusEnabled, AMProductVersion, AntivirusSignatureVersion, AntivirusSignatureLastUpdated
           $mp = Join-Path $env:ProgramFiles 'Windows Defender\MpCmdRun.exe'
           foreach ($exe in Get-ChildItem dist\*.exe) {
