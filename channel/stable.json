@@ -2,20 +2,20 @@
   "schemaVersion": 1,
   "id": "astral",
   "name": "Astral",
-  "version": "2.9",
+  "version": "3.0",
   "minecraftVersion": "26.3",
   "fabricLoader": "0.19.5",
   "minimumInstallerVersion": "1.0.0",
-  "publishedAt": "2026-11-02T19:12:37.392Z",
-  "releaseNotes": "Dando aquela otimizada na performace e deixando o client mais bonitinho tbm",
+  "publishedAt": "2026-11-03T21:05:16.612Z",
+  "releaseNotes": "Agora migramos para o figura para ficar divonicos, e tambem alguns ajustes",
   "pack": {
-    "url": "https://github.com/dvd-iso/astral-installer/releases/download/modpack-20261102-1557/Astral-2.9.mrpack?sha512=d597c892e558efe6",
-    "size": 18783940,
-    "sha512": "d597c892e558efe604dbad37fd558661b1ff693249e07c29cd214527fcdf5e3f3ec19b6e1b116ea799527de9f6a9a6bf86e7ebb07b8da1607e0555e2423cf4db"
+    "url": "https://github.com/dvd-iso/astral-installer/releases/download/modpack-20261103-1804/Astral-3.0.mrpack?sha512=f676ffe47b68f390",
+    "size": 19638953,
+    "sha512": "f676ffe47b68f390660270b6200b31a42c70eff56ddb80261026a2c63dffbe65791fe911d1397303775c7e92acca60ff41f0fc4bd997e0533cf878ac7bd33a97"
   },
   "modpack": {
     "protocolVersion": 1,
-    "contentSha256": "70607aaf1e3abd3257db79657185363dc4909b1e6b418b62b79f635532b1ba92",
-    "version": "2.9"
+    "contentSha256": "923dff836435117c848c5fdf20f132f1147f51af0e106f14ee1b6821069b2926",
+    "version": "3.0"
   }
 }
