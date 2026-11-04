@@ -2,20 +2,20 @@
   "schemaVersion": 1,
   "id": "astral",
   "name": "Astral",
-  "version": "3.1",
+  "version": "3.2",
   "minecraftVersion": "26.3",
   "fabricLoader": "0.19.5",
   "minimumInstallerVersion": "1.0.0",
-  "publishedAt": "2026-11-04T02:47:16.315Z",
-  "releaseNotes": "",
+  "publishedAt": "2026-11-04T03:02:13.999Z",
+  "releaseNotes": "Bolhas de chat agora aparecem para todos: o mod desenha as bolhas e mostra quem está digitando, com som. Ajuste altura, tamanho, opacidade e reações em Opções › Chat › Bolhas de chat.",
   "pack": {
-    "url": "https://github.com/dvd-iso/astral-installer/releases/download/modpack-20261103-2346/Astral-3.1.mrpack?sha512=105af7a1dbaa3939",
-    "size": 19638962,
-    "sha512": "105af7a1dbaa39391eb155f68781e356fefbd17f02ca287e7f7e0ea2e4b4775067b3aec7c83dca05136e4e83e5584dfc22f1af184cecaed660d47e232d39052c"
+    "url": "https://github.com/dvd-iso/astral-installer/releases/download/modpack-20261104-0000/Astral-3.2.mrpack?sha512=592e82ac0a085679",
+    "size": 19671438,
+    "sha512": "592e82ac0a0856793448c60934f264e3ee9d34978746b9d8fd762530ae635ac0cd3dffa6629d823727292a987b90be2710e1bd7cd6a7bb7a07680157a73aefef"
   },
   "modpack": {
     "protocolVersion": 1,
-    "contentSha256": "d3662d8da6caeb70fa0dce824ca9b8b0a9dfea1e9fdd6c3182e34b1fa719baa2",
-    "version": "3.1"
+    "contentSha256": "39bbf9f3fcb7e78f30c0f7cc0e81b80740d39d863b0370400b4f82489380faa3",
+    "version": "3.2"
   }
 }
