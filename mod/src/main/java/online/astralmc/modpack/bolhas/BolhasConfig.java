@@ -30,6 +30,8 @@ public final class BolhasConfig {
     public boolean reacoes = true;
     /** Mostra as três bolinhas de quem está digitando. */
     public boolean digitando = true;
+    /** Tique suave de teclado enquanto alguém digita. */
+    public boolean somDigitando = true;
     /** Cor do fundo da bolha de quem escolheu (0xRRGGBB), ou -1 para o padrão. */
     public int cor = Pacotes.SEM_COR;
 

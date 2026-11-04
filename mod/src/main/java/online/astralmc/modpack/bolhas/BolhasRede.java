@@ -58,6 +58,7 @@ public final class BolhasRede {
 
     private static void aCadaTick(Minecraft jogo) {
         BolhasTela.tickAmostra(jogo);
+        tiquesDeTeclado(jogo);
         boolean agora = BolhasConfig.atual().ligado && jogo.player != null && escrevendo(jogo.gui.screen());
         long relogio = System.currentTimeMillis();
         if (agora && (!digitando || relogio - ultimoEnvio >= REENVIO_MS)) {
@@ -67,6 +68,29 @@ public final class BolhasRede {
             enviar(new Pacotes.DigitandoEnvio(false));
         }
         digitando = agora;
+    }
+
+    private static final java.util.Map<java.util.UUID, Long> PROXIMO_TIQUE = new java.util.HashMap<>();
+
+    /** Um tique baixinho de teclado, em tempo irregular, na posição de quem está digitando. */
+    private static void tiquesDeTeclado(Minecraft jogo) {
+        BolhasConfig config = BolhasConfig.atual();
+        if (jogo.level == null || !config.ligado || !config.digitando || !config.somDigitando) {
+            PROXIMO_TIQUE.clear();
+            return;
+        }
+        long agora = System.currentTimeMillis();
+        var digitando = BolhasEstado.digitandoAgora(agora);
+        PROXIMO_TIQUE.keySet().retainAll(digitando);
+        for (java.util.UUID id : digitando) {
+            if (agora < PROXIMO_TIQUE.getOrDefault(id, 0L)) continue;
+            PROXIMO_TIQUE.put(id, agora + 140 + (long) (Math.random() * 260));
+            var entidade = jogo.level.getEntity(id);
+            if (entidade == null) continue;
+            float tom = 1.7f + (float) Math.random() * 0.6f;
+            jogo.level.playLocalSound(entidade.getX(), entidade.getEyeY(), entidade.getZ(),
+                net.minecraft.sounds.SoundEvents.UI_BUTTON_CLICK.value(), net.minecraft.sounds.SoundSource.PLAYERS, 0.12f, tom, false);
+        }
     }
 
     /** Tem texto na caixa do chat que não é um comando: mensagem de verdade sendo escrita. */

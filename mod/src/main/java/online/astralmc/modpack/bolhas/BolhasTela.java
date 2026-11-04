@@ -17,7 +17,7 @@ public final class BolhasTela extends Screen {
     private static final int MUTED = 0xA0A0B0;
     private static final int LARGURA = 200;
     /** Altura de todo o conteúdo de {@link #init()}, do título ao botão "Pronto", para centralizar na vertical. */
-    private static final int ALTURA_TOTAL = 306;
+    private static final int ALTURA_TOTAL = 328;
     private static final int[] PALETA = {
         0x101018, 0x7C3AED, 0xEC4899, 0xEF4444, 0xF59E0B, 0xFACC15, 0x22C55E, 0x14B8A6,
         0x3B82F6, 0x6366F1, 0xA78BFA, 0xF9A8D4, 0xFDE68A, 0xA7F3D0, 0xBFDBFE, 0xFFFFFF};
@@ -54,6 +54,8 @@ public final class BolhasTela extends Screen {
         addRenderableWidget(CycleButton.onOffBuilder(config.reacoes).create(x, y, LARGURA, 20, Component.literal("Reações dos humores"), (b, v) -> config.reacoes = v));
         y += 22;
         addRenderableWidget(CycleButton.onOffBuilder(config.digitando).create(x, y, LARGURA, 20, Component.literal("Ver quem está digitando"), (b, v) -> config.digitando = v));
+        y += 22;
+        addRenderableWidget(CycleButton.onOffBuilder(config.somDigitando).create(x, y, LARGURA, 20, Component.literal("Som de digitando"), (b, v) -> config.somDigitando = v));
         y += 26;
 
         StringWidget corTitulo = new StringWidget(Component.literal("Cor da sua bolha (todos veem)").withColor(MUTED), font);

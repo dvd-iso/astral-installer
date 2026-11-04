@@ -52,6 +52,12 @@ public final class BolhasEstado {
         return lista;
     }
 
+    /** Quem está com o "digitando" ativo agora, já sem os que expiraram. */
+    public static List<UUID> digitandoAgora(long agora) {
+        DIGITANDO.values().removeIf(desde -> agora - desde > DIGITANDO_MAX_MS);
+        return new ArrayList<>(DIGITANDO.keySet());
+    }
+
     public static boolean estaDigitando(UUID jogador, long agora) {
         Long desde = DIGITANDO.get(jogador);
         if (desde == null) return false;
