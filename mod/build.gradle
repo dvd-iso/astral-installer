@@ -3,10 +3,13 @@ plugins {
 }
 
 group = 'online.astralmc'
-version = '2.2.2'
+version = '2.3.0'
 base { archivesName = 'astral-modpack' }
 
-repositories { mavenCentral() }
+repositories {
+    mavenCentral()
+    maven { url = 'https://maven.fabricmc.net/' }
+}
 
 // Fixture de teste, nunca incluída no jar do Astral. Versão e hash publicados pelo Modrinth.
 def puzzleFixture = layout.buildDirectory.file('test-fixtures/puzzle-fabric-2.3.1+26.3.jar')
@@ -51,6 +54,8 @@ def preparePuzzleCompatibility = tasks.register('preparePuzzleCompatibility') {
 dependencies {
     minecraft 'com.mojang:minecraft:26.3'
     implementation 'net.fabricmc:fabric-loader:0.19.5'
+    // Só a rede (pacotes das bolhas); o pack já traz a Fabric API. A interface segue só com widgets do jogo.
+    implementation 'net.fabricmc.fabric-api:fabric-api:0.165.0+26.3'
     testImplementation 'org.junit.jupiter:junit-jupiter:5.11.4'
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher:1.11.4'
     testRuntimeOnly files(puzzleFixture).builtBy(preparePuzzleCompatibility)

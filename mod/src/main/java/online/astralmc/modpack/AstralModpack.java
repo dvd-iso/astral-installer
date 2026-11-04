@@ -23,6 +23,8 @@ public final class AstralModpack implements ClientModInitializer {
 
     @Override
     public void onInitializeClient() {
+        // As bolhas de chat vêm antes do atualizador: valem também no jar de desenvolvimento, sem a lista do pack.
+        online.astralmc.modpack.bolhas.BolhasRede.iniciar();
         PackManifest installed = PackManifest.embedded();
         String content = ModpackIdentity.contentSha256();
         if (installed == null || content == null) return; // Jar de desenvolvimento, sem a lista do pack.

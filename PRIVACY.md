@@ -30,8 +30,9 @@ O mod usa o cabeçalho `User-Agent: Astral-Modpack/2 (+https://astralmc.online)`
 | Ao clicar em **Atualizar agora** | `github.com` e os servidores de download declarados no `.mrpack` | Baixar o pack novo e os mods alterados, verificados por hash |
 | Ao clicar em **Ver como instalar** | `astralmc.online`, no navegador padrão | Abrir a página de instalação |
 | Ao entrar num servidor que pede a chave `astral:modpack` | O próprio servidor, na conexão do jogo | Responder com a identificação do pack instalado |
+| Ao jogar no servidor do Astral, com as bolhas de chat ligadas | O próprio servidor, na conexão do jogo | Avisar que o mod está instalado e, enquanto você escreve uma mensagem (sem comandos) no chat, que você está digitando |
 
-A resposta ao servidor é só a identificação do pack: versão e hash SHA-256 do conteúdo. Ela não contém dados pessoais, do computador ou da conta. O servidor do Astral usa essa identificação para recusar versões antigas do modpack.
+A resposta ao servidor é só a identificação do pack: versão e hash SHA-256 do conteúdo. Ela não contém dados pessoais, do computador ou da conta. O servidor do Astral usa essa identificação para recusar versões antigas do modpack. O aviso de digitação não leva o texto escrito, só o fato de estar digitando; o texto só sai quando você envia a mensagem. As bolhas de chat podem ser desligadas em Opções › Chat › Bolhas de chat.
 
 Esses serviços têm políticas de privacidade próprias, que valem para as requisições recebidas por eles. Isso inclui o [GitHub](https://docs.github.com/site-policy/privacy-policies/github-general-privacy-statement), o [Modrinth](https://modrinth.com/legal/privacy), a [Microsoft/Mojang](https://privacy.microsoft.com/privacystatement) e o FabricMC. Os demais mods do modpack são de terceiros e seguem as próprias licenças e políticas.
 
@@ -42,6 +43,7 @@ Estes dados ficam apenas no computador e não são enviados a ninguém:
 - No Windows, `%LOCALAPPDATA%\Astral\astral-instalador.exe`: o programa do instalador, reaproveitado na próxima vez. No macOS e no Linux, ele é apagado ao terminar.
 - Na pasta da instalação Astral, `.astral/`: a área temporária de downloads do instalador e, em `.astral/atualizacao/`, a atualização baixada pelo mod e o `registro.log` com o que foi aplicado.
 - Os registros da instalação Astral no launcher: a instância do Prism ou do SKlauncher, ou o perfil do Minecraft Launcher.
+- `config/astral_bolhas.json`, na pasta da instalação Astral: suas escolhas sobre as bolhas de chat (altura, tamanho, opacidade, duração, reações e sons).
 - `Downloads/Astral`: o `.mrpack` entregue ao Modrinth App ou a outro launcher.
 
 Para apagar tudo, remova a instalação Astral no seu launcher, a pasta `%LOCALAPPDATA%\Astral` no Windows e os arquivos de `Downloads/Astral`.
