@@ -68,7 +68,7 @@ public final class BolhasConfig {
         tamanho = limitar(tamanho, 0.5f, 2f, 1f);
         opacidade = limitar(opacidade, 0.2f, 1f, 0.75f);
         duracao = limitar(duracao, 0.5f, 2f, 1f);
-        cor = cor == Pacotes.SEM_COR ? cor : cor & 0xFFFFFF;
+        cor = Pacotes.SEM_COR; // a cor da bolha não é mais escolhida pelo jogador
         return this;
     }
 

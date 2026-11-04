@@ -6,7 +6,6 @@ import java.util.function.DoubleFunction;
 import net.minecraft.client.gui.components.AbstractSliderButton;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.CycleButton;
-import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.components.StringWidget;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
@@ -14,17 +13,12 @@ import net.minecraft.network.chat.Component;
 /** Escolhas do jogador sobre as bolhas de chat. Só widgets do jogo, como o resto da interface deste mod. */
 public final class BolhasTela extends Screen {
     private static final int GOLD = 0xF2C14E;
-    private static final int MUTED = 0xA0A0B0;
     private static final int LARGURA = 200;
     /** Altura de todo o conteúdo de {@link #init()}, do título ao botão "Pronto", para centralizar na vertical. */
-    private static final int ALTURA_TOTAL = 328;
-    private static final int[] PALETA = {
-        0x101018, 0x7C3AED, 0xEC4899, 0xEF4444, 0xF59E0B, 0xFACC15, 0x22C55E, 0x14B8A6,
-        0x3B82F6, 0x6366F1, 0xA78BFA, 0xF9A8D4, 0xFDE68A, 0xA7F3D0, 0xBFDBFE, 0xFFFFFF};
+    private static final int ALTURA_TOTAL = 248;
     private static final String[] AMOSTRAS = {"Olá!", "Consegui!", "Tudo bem?", "SOCORRO", "*acena*"};
 
     private final Screen pai;
-    private EditBox hex;
     private static int amostra;
     /** Instante em que a mensagem de exemplo aparece, depois das bolinhas de "digitando"; 0 = nenhuma na fila. */
     private static long amostraEm;
@@ -58,27 +52,6 @@ public final class BolhasTela extends Screen {
         addRenderableWidget(CycleButton.onOffBuilder(config.somDigitando).create(x, y, LARGURA, 20, Component.literal("Som de digitando"), (b, v) -> config.somDigitando = v));
         y += 26;
 
-        StringWidget corTitulo = new StringWidget(Component.literal("Cor da sua bolha (todos veem)").withColor(MUTED), font);
-        corTitulo.setX(x);
-        corTitulo.setY(y);
-        addRenderableWidget(corTitulo);
-        y += 12;
-        int lado = LARGURA / 8;
-        for (int i = 0; i < PALETA.length; i++) {
-            int rgb = PALETA[i];
-            addRenderableWidget(Button.builder(Component.literal("■").withColor(rgb), b -> escolher(rgb))
-                .bounds(x + (i % 8) * lado, y + (i / 8) * 20, lado - 2, 18).build());
-        }
-        y += 42;
-        hex = new EditBox(font, x, y, 96, 18, Component.literal("Cor em hexadecimal"));
-        hex.setMaxLength(7);
-        hex.setHint(Component.literal("#RRGGBB").withColor(MUTED));
-        hex.setValue(config.cor == Pacotes.SEM_COR ? "" : String.format("#%06X", config.cor));
-        hex.setResponder(this::digitouHex);
-        addRenderableWidget(hex);
-        addRenderableWidget(Button.builder(Component.literal("Padrão"), b -> escolher(Pacotes.SEM_COR)).bounds(x + 100, y - 1, 100, 20).build());
-        y += 26;
-
         addRenderableWidget(Button.builder(Component.literal("Testar na minha cabeça"), b -> testar()).bounds(x, y, LARGURA, 20).build());
         y += 26;
         addRenderableWidget(Button.builder(Component.literal("Pronto"), b -> onClose()).bounds(x, Math.min(height - 26, y + 4), LARGURA, 20).build());
@@ -88,21 +61,6 @@ public final class BolhasTela extends Screen {
                          DoubleFunction<String> texto, DoubleConsumer aplicar) {
         addRenderableWidget(new Controle(x, y, nome, valor, minimo, maximo, texto, aplicar));
         return y + 22;
-    }
-
-    private void escolher(int rgb) {
-        BolhasConfig.atual().cor = rgb;
-        hex.setValue(rgb == Pacotes.SEM_COR ? "" : String.format("#%06X", rgb));
-    }
-
-    private void digitouHex(String texto) {
-        String limpo = texto.startsWith("#") ? texto.substring(1) : texto;
-        if (limpo.length() != 6) return;
-        try {
-            BolhasConfig.atual().cor = Integer.parseInt(limpo, 16);
-        } catch (NumberFormatException ex) {
-            // Ainda não é uma cor válida: espera o jogador terminar de digitar.
-        }
     }
 
     /** Mostra as bolinhas de "digitando" e, logo depois, uma mensagem de exemplo acima da própria cabeça (aperte F5). */
