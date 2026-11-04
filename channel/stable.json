@@ -1,21 +1,21 @@
 {
   "schemaVersion": 1,
   "id": "astral",
-  "name": "Astral",
-  "version": "3.2",
+  "name": "Astral-Pets-and-Shop",
+  "version": "3.3",
   "minecraftVersion": "26.3",
   "fabricLoader": "0.19.5",
   "minimumInstallerVersion": "1.0.0",
-  "publishedAt": "2026-11-04T03:02:13.999Z",
-  "releaseNotes": "Bolhas de chat agora aparecem para todos: o mod desenha as bolhas e mostra quem está digitando, com som. Ajuste altura, tamanho, opacidade e reações em Opções › Chat › Bolhas de chat.",
+  "publishedAt": "2026-11-04T19:34:05.706Z",
+  "releaseNotes": "Adicionamos o sistema de pets e a nossa lojinha oficial do servidor, então visite astramc.online/loja.html",
   "pack": {
-    "url": "https://github.com/dvd-iso/astral-installer/releases/download/modpack-20261104-0000/Astral-3.2.mrpack?sha512=592e82ac0a085679",
-    "size": 19671438,
-    "sha512": "592e82ac0a0856793448c60934f264e3ee9d34978746b9d8fd762530ae635ac0cd3dffa6629d823727292a987b90be2710e1bd7cd6a7bb7a07680157a73aefef"
+    "url": "https://github.com/dvd-iso/astral-installer/releases/download/modpack-20261104-1632/Astral-3.3.mrpack?sha512=db53357ae448fc59",
+    "size": 19982404,
+    "sha512": "db53357ae448fc590a99c9813ba8f79fd7a6df5e43fee696e096c2dc9329f8cf7714584a42cdd49d1b6959b06fc84a68b9f549bf1d590032d6233c8ace8113d5"
   },
   "modpack": {
     "protocolVersion": 1,
-    "contentSha256": "39bbf9f3fcb7e78f30c0f7cc0e81b80740d39d863b0370400b4f82489380faa3",
-    "version": "3.2"
+    "contentSha256": "6aaae9510f51d62be012763c642c89fce59caa8b93a1c22c524ff70b49d991be",
+    "version": "3.3"
   }
 }
