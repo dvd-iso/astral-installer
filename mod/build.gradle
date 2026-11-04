@@ -3,7 +3,7 @@ plugins {
 }
 
 group = 'online.astralmc'
-version = '2.2.2'
+version = '2.3.0'
 base { archivesName = 'astral-modpack' }
 
 repositories {
